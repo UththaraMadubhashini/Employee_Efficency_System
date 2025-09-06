@@ -1,0 +1,105 @@
+/* Sidebar Container */
+.sidebar-container {
+  height: 100vh;
+  background-color: #4544B4;
+  font-family: "Segoe UI", sans-serif;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+
+/* Logo */
+.sidebar-logo {
+  text-align: center;
+  padding: 20px 0;
+}
+.sidebar-logo img {
+  width: 100px;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
+/* Navigation */
+.sidebar-nav {
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Default Sidebar Link */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  margin: 5px 0;
+  text-decoration: none;
+  font-weight: 600;
+  width: 210px; 
+  font-size: 17px;
+  background-color: #67BCE0;
+  border-radius: 8px;
+  border: 3px solid white;
+  color: black; 
+  transition: all 0.3s ease;
+}
+
+.sidebar-link:hover {
+  transform: translateX(2px);
+}
+
+/* Active Sidebar Link */
+.sidebar-link.active {
+  background-color: #0D07C0; 
+  border: 3px solid black; 
+  color: white;
+}
+
+.sidebar-link.active .sidebar-icon {
+  color: white;
+}
+
+/* Sidebar Icons */
+.sidebar-icon {
+  min-width: 24px;
+  display: flex;
+  justify-content: center;
+  margin-right: 10px;
+  font-size: 20px;
+  line-height: 1;
+  color: black; /* Default icon */
+}
+
+/* Desktop Fixed Sidebar */
+.sidebar-fixed {
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  z-index: 1200;
+}
+
+/* Mobile Hamburger Button - smaller size */
+.hamburger-btn {
+  position: fixed !important;
+  top: 10px;
+  left: 10px;
+  z-index: 1300;
+  background-color: #4544B4 !important;
+  border: none !important;
+  width: 40px;          
+  height: 40px;        
+  padding: 6px;         
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px; 
+}
+
+@media screen and (max-width: 768px) {
+  .sidebar-fixed {
+    display: none;
+  }
+}
