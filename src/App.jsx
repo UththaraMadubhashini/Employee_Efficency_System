@@ -4,25 +4,25 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import AdminLayout from '../src/Layout/AdminLayout';
 import EmployeeLayout from '../src/Layout/EmployeeLayout';
-import Login from './pages/Login/Login';
+import Login from './Pages/Login/Login';
 
 // Admin Components and Pages
 import AdminSidebar from './components/Sidebar/AdminSidebar';
-import AdminDashboard from './pages/Admin/Ad_Dashboard';
-import ProfileManagement from './pages/Admin/Ad_Profile';
-import AttendanceManagement from './pages/Admin/Ad_Attandance';
-import PerformanceManagement from './pages/Admin/Ad_Perfomance';
-import TaskManagement from './pages/Admin/Ad_Task';
-import Ad_ProfileForm from './pages/Admin/Ad_ProfileForm';
-import Ad_LeaveMang from './pages/Admin/Ad_LeaveMang';
+import AdminDashboard from './Pages/Admin/Ad_Dashboard';
+import ProfileManagement from './Pages/Admin/Ad_Profile';
+import AttendanceManagement from './Pages/Admin/Ad_Attandance';
+import PerformanceManagement from './Pages/Admin/Ad_Perfomance';
+import TaskManagement from './Pages/Admin/Ad_Task';
+import Ad_ProfileForm from './Pages/Admin/Ad_ProfileForm';
+import Ad_LeaveMang from './Pages/Admin/Ad_LeaveMang';
 
-import Dashboard from './pages/Employee/Em_Dashboard/Em_Dashboard';
-import Profile from './pages/Employee/Em_Profile/Profile';
-import Attendance from './pages/Employee/Em_Attandance/Attandance';
-import Leave from './pages/Employee/Em_Leave/Leave';
-import Performance from './pages/Employee/Perfomance/Perfomance';
-import Task from './pages/Employee/Em_Task/Task';
-import Equipment from './pages/Employee/Em_Equipment/Equipment';
+import Dashboard from './Pages/Employee/Em_Dashboard/Em_Dashboard';
+import Profile from './Pages/Employee/Em_Profile/Profile';
+import Attendance from './Pages/Employee/Em_Attandance/Attandance';
+import Leave from './Pages/Employee/Em_Leave/Leave';
+import Performance from './Pages/Employee/Perfomance/Perfomance';
+import Task from './Pages/Employee/Em_Task/Task';
+import Equipment from './Pages/Employee/Em_Equipment/Equipment';
 
 
 
