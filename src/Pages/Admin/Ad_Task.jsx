@@ -1,138 +1,74 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  IconButton,
-  MenuItem,
-  Paper,
-  Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TextField,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  MenuItem,
+  IconButton,
+  Snackbar,
+  Alert,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TablePagination,
+  Select,
+  Grid,
 } from "@mui/material";
-import { Add, Edit, Delete, Visibility } from "@mui/icons-material";
+import { Edit, Delete } from "@mui/icons-material";
+import { rtdb } from "../../firebase/firebase";
+import { ref, set, update, remove, onValue } from "firebase/database";
 
 const labelWithAsterisk = (label) => (
   <Box component="span">
     {label}
-    <Box component="span" sx={{ color: "red" }}>*</Box>
+    <Box component="span" sx={{ color: "red" }}>
+      {" "}
+      *{" "}
+    </Box>
   </Box>
 );
 
-export default function Ad_Task() {
-  const [openDialog, setOpenDialog] = useState(false);
-  const [viewDialog, setViewDialog] = useState(false);
-  const [editDialog, setEditDialog] = useState(false);
-  const [deleteDialog, setDeleteDialog] = useState(false);
+/* ---------------- Reusable Confirm Dialog ---------------- */
+function ConfirmDialog({
+  open,
+  title,
+  message,
+  confirmColor = "primary",
+  onCancel,
+  onConfirm,
+}) {
+  return (
+    <Dialog open={open} onClose={onCancel} fullWidth maxWidth="xs">
+      <DialogTitle>{title}</DialogTitle>
+      <DialogContent>
+        <Typography>{message}</Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onCancel}>Cancel</Button>
+        <Button variant="contained" color={confirmColor} onClick={onConfirm}>
+          Confirm
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
 
-  const [formData, setFormData] = useState({
-    taskId: "",
-    employeeId: "",
-    employeeName: "",
-    department: "",
-    description: "",
-    startDate: "",
-    endDate: "",
-  });
-
-  const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
-  const [taskList, setTaskList] = useState([
-    {
-      taskId: "TSK001",
-      employeeId: "EMP001",
-      employeeName: "John Doe",
-      department: "IT",
-      description: "Develop login module",
-      startDate: "2025-08-01",
-      endDate: "2025-08-05",
-    },
-    {
-      taskId: "TSK002",
-      employeeId: "EMP002",
-      employeeName: "Jane Smith",
-      department: "HR",
-      description: "Prepare onboarding docs",
-      startDate: "2025-08-03",
-      endDate: "2025-08-06",
-    },
-    {
-      taskId: "TSK003",
-      employeeId: "EMP003",
-      employeeName: "Michael Lee",
-      department: "IT",
-      description: "Update security patches",
-      startDate: "2025-08-04",
-      endDate: "2025-08-07",
-    },
-  ]);
-
-  const handleOpen = () => {
-    setFormData({
-      taskId: "",
-      employeeId: "",
-      employeeName: "",
-      department: "",
-      description: "",
-      startDate: "",
-      endDate: "",
-    });
-    setOpenDialog(true);
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleAddTask = () => {
-    if (Object.values(formData).some((val) => val === "")) {
-      alert("Please fill in all fields");
-      return;
-    }
-    setTaskList([...taskList, formData]);
-    setOpenDialog(false);
-  };
-
-  const handleView = (index) => {
-    setFormData(taskList[index]);
-    setViewDialog(true);
-  };
-
-  const handleEdit = (index) => {
-    setSelectedTaskIndex(index);
-    setFormData(taskList[index]);
-    setEditDialog(true);
-  };
-
-  const handleSaveEdit = () => {
-    const updated = [...taskList];
-    updated[selectedTaskIndex] = formData;
-    setTaskList(updated);
-    setEditDialog(false);
-  };
-
-  const handleDelete = (index) => {
-    setSelectedTaskIndex(index);
-    setDeleteDialog(true);
-  };
-
-  const confirmDelete = () => {
-    const updated = [...taskList];
-    updated.splice(selectedTaskIndex, 1);
-    setTaskList(updated);
-    setDeleteDialog(false);
-  };
-
-  const renderFormFields = (readOnly = false) => (
+/* ---------------- Reusable Form Fields ---------------- */
+function FormFields({
+  formData,
+  handleChange,
+  employees = [],
+  handleEmployeeSelect,
+  readOnly = false,
+}) {
+  return (
     <Box
       sx={{
         boxShadow: 3,
@@ -143,159 +79,495 @@ export default function Ad_Task() {
       }}
     >
       <Grid container spacing={2}>
-        {["taskId", "employeeId", "employeeName", "department", "description"].map((field, idx) => (
-          <Grid item xs={12} sm={6} key={idx}>
-            <TextField
-              fullWidth
-              label={labelWithAsterisk(field.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase()))}
-              name={field}
-              value={formData[field]}
-              onChange={handleChange}
-              variant="outlined"
-              InputProps={{ readOnly }}
-              sx={{ bgcolor: "#fff" }}
-            />
-          </Grid>
-        ))}
-
+        {/* Task ID */}
         <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Task ID"
+            name="taskId"
+            value={formData.taskId}
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+
+        {/* Employee ID */}
+        <Grid item xs={12} sm={6}>
+          <Select
+            fullWidth
+            name="employeeId"
+            value={formData.employeeId}
+            onChange={handleEmployeeSelect}
+            displayEmpty
+          >
+            <MenuItem value="">Select Employee</MenuItem>
+            {employees.map((emp) => (
+              <MenuItem key={emp.employeeId} value={emp.employeeId}>
+                {emp.employeeId} - {emp.fullName}
+              </MenuItem>
+            ))}
+          </Select>
+        </Grid>
+
+        {/* Employee Name */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Employee Name"
+            name="employeeName"
+            value={formData.employeeName}
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+
+        {/* Department */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            fullWidth
+            label="Department"
+            name="department"
+            value={formData.department}
+            InputProps={{ readOnly: true }}
+          />
+        </Grid>
+
+        {/* Description */}
+        <Grid item xs={12}>
+          <TextField
+            fullWidth
+            multiline
+            rows={2}
+            label="Description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            InputProps={{ readOnly }}
+          />
+        </Grid>
+
+        {/* Start Date */}
+        <Grid item xs={12}>
           <TextField
             fullWidth
             type="date"
             name="startDate"
-            label={labelWithAsterisk("Start Date")}
+            label="Start Date"
             InputLabelProps={{ shrink: true }}
             value={formData.startDate}
             onChange={handleChange}
             InputProps={{ readOnly }}
-            sx={{ bgcolor: "#fff" }}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+
+        {/* End Date */}
+        <Grid item xs={12}>
           <TextField
             fullWidth
             type="date"
             name="endDate"
-            label={labelWithAsterisk("End Date")}
+            label="End Date"
             InputLabelProps={{ shrink: true }}
             value={formData.endDate}
             onChange={handleChange}
             InputProps={{ readOnly }}
-            sx={{ bgcolor: "#fff" }}
           />
         </Grid>
       </Grid>
     </Box>
   );
+}
+
+/* ---------------- Main Component ---------------- */
+export default function Ad_Task() {
+  const [formData, setFormData] = useState({
+    taskId: "",
+    employeeId: "",
+    employeeName: "",
+    department: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+  });
+
+  const [employees, setEmployees] = useState([]);
+  const [taskList, setTaskList] = useState([]);
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 5;
+
+  const [openAdd, setOpenAdd] = useState(false); // (unused but kept)
+  const [openEdit, setOpenEdit] = useState(false); // (unused but kept)
+  const [openDelete, setOpenDelete] = useState(false); // (unused but kept)
+  const [selectedTask, setSelectedTask] = useState(null);
+
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+
+  const [openConfirmAdd, setOpenConfirmAdd] = useState(false);
+  const [openConfirmEdit, setOpenConfirmEdit] = useState(false);
+  const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+
+  const [snack, setSnack] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  // Minimal filter state to satisfy existing useMemo usage (UI not changed)
+  const [filterDept] = useState("");
+  const [filterEmp] = useState("");
+
+  /* Load Employees */
+  useEffect(() => {
+    const employeesRef = ref(rtdb, "employees");
+    return onValue(employeesRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) setEmployees(Object.values(data));
+    });
+  }, []);
+
+  /* Load Tasks (newest first) */
+  useEffect(() => {
+    const tasksRef = ref(rtdb, "tasks");
+    return onValue(tasksRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const loaded = Object.values(data).sort((a, b) =>
+          b.taskId.localeCompare(a.taskId)
+        );
+        setTaskList(loaded);
+      } else {
+        setTaskList([]);
+      }
+      setPage(0);
+    });
+  }, []);
+
+  /* Handle Change */
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+
+  /* Auto-fill employee info */
+  const handleEmployeeSelect = (e) => {
+    const selectedId = e.target.value;
+    const emp = employees.find((emp) => emp.employeeId === selectedId);
+    if (emp) {
+      setFormData((prev) => ({
+        ...prev,
+        employeeId: emp.employeeId,
+        employeeName: emp.fullName,
+        department: emp.department,
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, employeeId: selectedId }));
+    }
+  };
+
+  // Auto-generate TaskID when Add Dialog opens
+  useEffect(() => {
+    if (openAddDialog) {
+      setFormData((prev) => ({ ...prev, taskId: generateTaskId() }));
+    }
+  }, [openAddDialog, taskList]);
+
+  // Unique options for filters from current dataset (kept to match original code)
+  const departmentOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(taskList.map((t) => t.department).filter(Boolean))
+      ).sort(),
+    [taskList]
+  );
+  const employeeIdOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(taskList.map((t) => t.employeeId).filter(Boolean))
+      ).sort(),
+    [taskList]
+  );
+
+  // Apply filters (kept for compatibility)
+  const filtered = useMemo(() => {
+    return taskList.filter((t) => {
+      const deptOk = filterDept ? t.department === filterDept : true;
+      const empOk = filterEmp ? t.employeeId === filterEmp : true;
+      return deptOk && empOk;
+    });
+  }, [taskList, filterDept, filterEmp]);
+
+  // Paginate (kept, even if not used in table below)
+  const paged = useMemo(() => {
+    const start = page * rowsPerPage;
+    return filtered.slice(start, start + rowsPerPage);
+  }, [filtered, page]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
+  const resetForm = () =>
+    setFormData({
+      taskId: "",
+      employeeId: "",
+      employeeName: "",
+      department: "",
+      description: "",
+      startDate: "",
+      endDate: "",
+    });
+
+  /* Generate Task ID */
+  const generateTaskId = () => {
+    if (taskList.length === 0) return "TSK001";
+    const lastId = taskList[0].taskId;
+    const number = parseInt(lastId.replace("TSK", ""), 10) + 1;
+    return `TSK${number.toString().padStart(3, "0")}`;
+  };
+
+  /* Basic validation */
+  const validateForm = () => {
+    if (!formData.employeeId) {
+      setSnack({ open: true, message: "Select an employee.", severity: "warning" });
+      return false;
+    }
+    if (!formData.description) {
+      setSnack({ open: true, message: "Description is required.", severity: "warning" });
+      return false;
+    }
+    if (!formData.startDate || !formData.endDate) {
+      setSnack({ open: true, message: "Start and End dates are required.", severity: "warning" });
+      return false;
+    }
+    if (new Date(formData.endDate) < new Date(formData.startDate)) {
+      setSnack({ open: true, message: "End date cannot be before start date.", severity: "warning" });
+      return false;
+    }
+    return true;
+  };
+
+  /* Add Task */
+  const handleAdd = () => {
+    setFormData({
+      taskId: generateTaskId(),
+      employeeId: "",
+      employeeName: "",
+      department: "",
+      description: "",
+      startDate: "",
+      endDate: "",
+    });
+    setOpenAdd(true); // kept as in original
+    setOpenAddDialog(true); // actually opens the dialog
+  };
+
+  const confirmAdd = async () => {
+    if (!validateForm()) return;
+    const taskRef = ref(rtdb, `tasks/${formData.taskId}`);
+    await set(taskRef, formData);
+    setOpenConfirmAdd(false);
+    setOpenAddDialog(false);
+    setSnack({ open: true, message: "Task added successfully!", severity: "success" });
+  };
+
+  /* Edit Task */
+  const handleEditClickOpen = (task) => {
+    setFormData(task);
+    setSelectedTask(task);
+    setOpenEditDialog(true);
+  };
+
+  const confirmEdit = async () => {
+    if (!validateForm()) return;
+    if (selectedTask) {
+      const taskRef = ref(rtdb, `tasks/${formData.taskId}`);
+      await update(taskRef, formData);
+      setOpenConfirmEdit(false);
+      setOpenEditDialog(false);
+      setSnack({ open: true, message: "Task updated successfully!", severity: "info" });
+    }
+  };
+
+  /* Delete Task */
+  const handleDeleteClickOpen = (task) => {
+    setSelectedTask(task);
+    setOpenDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (selectedTask) {
+      const taskRef = ref(rtdb, `tasks/${selectedTask.taskId}`);
+      await remove(taskRef);
+      setOpenConfirmDelete(false);
+      setOpenDeleteDialog(false);
+      setSnack({ open: true, message: "Task deleted!", severity: "error" });
+    }
+  };
 
   return (
-    <Box p={4}>
-      <Grid container spacing={2} alignItems="center" mb={3}>
-        <Grid item xs={12} sm={2}>
-          <Select fullWidth defaultValue="" displayEmpty>
-            <MenuItem value="" disabled>Department</MenuItem>
-            <MenuItem value="HR">HR</MenuItem>
-            <MenuItem value="IT">IT</MenuItem>
-          </Select>
-        </Grid>
-        <Grid item xs={12} sm={2}>
-          <Select fullWidth defaultValue="" displayEmpty>
-            <MenuItem value="" disabled>Emp_ID</MenuItem>
-            <MenuItem value="EMP001">EMP001</MenuItem>
-            <MenuItem value="EMP002">EMP002</MenuItem>
-          </Select>
-        </Grid>
-        <Grid item xs={12} sm={8} textAlign="right">
-          <Button
-            variant="contained"
-            onClick={handleOpen}
-            sx={{
-              backgroundColor: "#74C0E3",
-              borderRadius: "30px",
-              border: "2px solid #000000",
-              color: "#000",
-              fontWeight: "bold",
-              fontSize: "1rem",
-              px: 4,
-              py: 1,
-              textTransform: "none",
-              "&:hover": { backgroundColor: "#ffffff" },
-            }}
-          >
-            + New Task
-          </Button>
-        </Grid>
-      </Grid>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h5" gutterBottom>
+        Task Management
+      </Typography>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead sx={{ background: "#b4a7d6" }}>
-            <TableRow>
-              <TableCell>Task_ID</TableCell>
-              <TableCell>Emp_Name</TableCell>
-              <TableCell>Department</TableCell>
-              <TableCell>Description</TableCell>
-              <TableCell>Start Date</TableCell>
-              <TableCell>End Date</TableCell>
-              <TableCell>Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {taskList.map((task, idx) => (
-              <TableRow key={idx}>
+      {/* Add Task Button */}
+      <Button variant="contained" sx={{ mb: 2 }} onClick={handleAdd}>
+        Add Task
+      </Button>
+
+      {/* Table */}
+      <Table>
+        <TableHead sx={{ backgroundColor: "#A1A3DC" }}>
+          <TableRow>
+            <TableCell>Task ID</TableCell>
+            <TableCell>Employee ID</TableCell>
+            <TableCell>Employee Name</TableCell>
+            <TableCell>Department</TableCell>
+            <TableCell>Description</TableCell>
+            <TableCell>Start / End Date</TableCell>
+            <TableCell>Actions</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {taskList
+            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+            .map((task) => (
+              <TableRow key={task.taskId}>
                 <TableCell>{task.taskId}</TableCell>
+                <TableCell>{task.employeeId}</TableCell>
                 <TableCell>{task.employeeName}</TableCell>
                 <TableCell>{task.department}</TableCell>
                 <TableCell>{task.description}</TableCell>
-                <TableCell>{task.startDate}</TableCell>
-                <TableCell>{task.endDate}</TableCell>
                 <TableCell>
-                  <IconButton color="primary" onClick={() => handleView(idx)}><Visibility /></IconButton>
-                  <IconButton color="secondary" onClick={() => handleEdit(idx)}><Edit /></IconButton>
-                  <IconButton color="error" onClick={() => handleDelete(idx)}><Delete /></IconButton>
+                  {task.startDate} / {task.endDate}
+                </TableCell>
+                <TableCell>
+                  <IconButton
+                    color="secondary"
+                    onClick={() => handleEditClickOpen(task)}
+                  >
+                    <Edit />
+                  </IconButton>
+                  <IconButton
+                    color="error"
+                    onClick={() => handleDeleteClickOpen(task)}
+                  >
+                    <Delete />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+        </TableBody>
+      </Table>
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="sm">
+      {/* Pagination */}
+      <TablePagination
+        component="div"
+        count={taskList.length}
+        page={page}
+        onPageChange={(e, newPage) => setPage(newPage)}
+        rowsPerPage={rowsPerPage}
+        rowsPerPageOptions={[rowsPerPage]}
+      />
+
+      {/* Add Dialog */}
+      <Dialog
+        open={openAddDialog}
+        onClose={() => setOpenAddDialog(false)}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Add a New Task</DialogTitle>
-        <DialogContent sx={{ p: 3 }}>{renderFormFields()}</DialogContent>
+        <DialogContent sx={{ p: 3 }}>
+          <FormFields
+            formData={formData}
+            handleChange={handleChange}
+            employees={employees}
+            handleEmployeeSelect={handleEmployeeSelect}
+          />
+        </DialogContent>
         <DialogActions>
-          <Button onClick={handleAddTask}>Add</Button>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button onClick={() => setOpenConfirmAdd(true)}>Add</Button>
+          <Button onClick={() => setOpenAddDialog(false)}>Cancel</Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={viewDialog} onClose={() => setViewDialog(false)} fullWidth maxWidth="sm">
-        <DialogTitle>View Task</DialogTitle>
-        <DialogContent sx={{ p: 3 }}>{renderFormFields(true)}</DialogContent>
-        <DialogActions>
-          <Button onClick={() => setViewDialog(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog open={editDialog} onClose={() => setEditDialog(false)} fullWidth maxWidth="sm">
+      {/* Edit Dialog */}
+      <Dialog
+        open={openEditDialog}
+        onClose={() => setOpenEditDialog(false)}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Edit Task</DialogTitle>
-        <DialogContent sx={{ p: 3 }}>{renderFormFields()}</DialogContent>
+        <DialogContent sx={{ p: 3 }}>
+          <FormFields
+            formData={formData}
+            handleChange={handleChange}
+            employees={employees}
+            handleEmployeeSelect={handleEmployeeSelect}
+          />
+        </DialogContent>
         <DialogActions>
-          <Button onClick={handleSaveEdit}>Save</Button>
-          <Button onClick={() => setEditDialog(false)}>Cancel</Button>
+          <Button onClick={() => setOpenConfirmEdit(true)}>Save</Button>
+          <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={deleteDialog} onClose={() => setDeleteDialog(false)}>
-        <DialogTitle>Confirm Delete</DialogTitle>
+      {/* Delete Dialog */}
+      <Dialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>Delete Task</DialogTitle>
         <DialogContent>
           <Typography>Are you sure you want to delete this task?</Typography>
         </DialogContent>
         <DialogActions>
-          <Button color="error" onClick={confirmDelete}>Yes, Delete</Button>
-          <Button onClick={() => setDeleteDialog(false)}>Cancel</Button>
+          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
+            Yes, Delete
+          </Button>
+          <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Confirm Dialogs */}
+      <ConfirmDialog
+        open={openConfirmAdd}
+        title="Confirm Add"
+        message="Are you sure you want to add this task?"
+        onCancel={() => setOpenConfirmAdd(false)}
+        onConfirm={confirmAdd}
+      />
+      <ConfirmDialog
+        open={openConfirmEdit}
+        title="Confirm Save"
+        message="Save changes to this task?"
+        onCancel={() => setOpenConfirmEdit(false)}
+        onConfirm={confirmEdit}
+      />
+      <ConfirmDialog
+        open={openConfirmDelete}
+        title="Confirm Delete"
+        message="This action cannot be undone. Delete task?"
+        confirmColor="error"
+        onCancel={() => setOpenConfirmDelete(false)}
+        onConfirm={confirmDelete}
+      />
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={3000}
+        onClose={() => setSnack((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnack((s) => ({ ...s, open: false }))}
+          severity={snack.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snack.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
