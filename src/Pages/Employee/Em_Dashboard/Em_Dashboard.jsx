@@ -11,7 +11,7 @@ import {
 import { PieChart, Pie, Cell } from 'recharts';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import './Em_Dashboard.css'; // <-- new CSS file for calendar
+import './Em_Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
