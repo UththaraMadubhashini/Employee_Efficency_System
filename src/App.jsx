@@ -15,16 +15,15 @@ import PerformanceManagement from './Pages/Admin/Ad_Perfomance';
 import TaskManagement from './Pages/Admin/Ad_Task';
 import Ad_ProfileForm from './Pages/Admin/Ad_ProfileForm';
 import Ad_LeaveMang from './Pages/Admin/Ad_LeaveMang';
+import EmployeeRegistration from './Pages/Employee/Em_Attendance/RegisterFace';
 
 import Dashboard from './Pages/Employee/Em_Dashboard/Em_Dashboard';
 import Profile from './Pages/Employee/Em_Profile/Profile';
-import Attendance from './Pages/Employee/Em_Attandance/Attandance';
+import Attendance from './Pages/Employee/Em_Attendance/Attendance';
 import Leave from './Pages/Employee/Em_Leave/Leave';
 import Performance from './Pages/Employee/Perfomance/Perfomance';
 import Task from './Pages/Employee/Em_Task/Task';
 import Equipment from './Pages/Employee/Em_Equipment/Equipment';
-
-
 
 function App() {
   return (
@@ -47,6 +46,7 @@ function App() {
           <Route path="Leave-management" element={<Ad_LeaveMang />} />
           <Route path="performance-management" element={<PerformanceManagement />} />
           <Route path="task-management" element={<TaskManagement />} />
+          <Route path="Reg-face" element={<EmployeeRegistration />} />
         </Route>
 
 

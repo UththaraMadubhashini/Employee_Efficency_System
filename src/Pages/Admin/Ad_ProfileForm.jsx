@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { useTheme } from "@mui/material/styles";
 import { rtdb } from "../../firebase/firebase";
 import { ref, set, get } from "firebase/database";
-import { useNavigate } from "react-router-dom"; // <-- added
+import { useNavigate } from "react-router-dom";
 
 export default function Ad_ProfileForm() {
   
@@ -32,7 +32,7 @@ export default function Ad_ProfileForm() {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const navigate = useNavigate(); // <-- added
+  const navigate = useNavigate();
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -40,7 +40,7 @@ export default function Ad_ProfileForm() {
     severity: "success",
   });
   const [autoEmpId, setAutoEmpId] = useState("");
-  const [role, setRole] = useState("Employee"); // default role
+  const [role, setRole] = useState("Employee");
 
   const whiteInputStyle = { backgroundColor: "#ffffff" };
   const requiredLabelProps = {
