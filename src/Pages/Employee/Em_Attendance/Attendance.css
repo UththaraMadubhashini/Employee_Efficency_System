@@ -1,0 +1,375 @@
+/* Main container */
+.attendance-container {
+  padding: 24px;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
+
+/* Calendar Card */
+.attendance-calendar-card {
+  padding: 16px;
+  border: 3px solid #67bce0;
+  border-radius: 12px;
+  box-shadow: 0 3px 12px rgb(103 188 224 / 0.3);
+  height: auto;
+  overflow: visible;
+}
+
+/* Calendar Styling */
+.react-calendar {
+  border: none;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  width: 100%;
+  max-width: 100%;
+}
+
+.react-calendar__viewContainer {
+  width: 100%;
+}
+
+.react-calendar__month-view {
+  width: 100%;
+}
+
+/* Force grid layout for calendar */
+.react-calendar__month-view__days {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 6px !important;
+}
+
+.react-calendar__navigation {
+  display: flex;
+  height: 45px;
+  margin-bottom: 12px;
+}
+
+.react-calendar__navigation button {
+  color: #4544b4;
+  font-weight: 700;
+  min-width: 44px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.react-calendar__navigation button:hover,
+.react-calendar__navigation button:focus {
+  background-color: #67bce0;
+  color: white;
+}
+
+.react-calendar__navigation button:disabled {
+  background-color: #f0f0f0;
+}
+
+.react-calendar__month-view__weekdays {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 6px !important;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 12px;
+  color: #4544b4;
+  border-bottom: 2px solid #67bce0;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.react-calendar__month-view__weekdays__weekday {
+  text-align: center;
+  padding: 6px 0;
+}
+
+/* Make calendar tiles smaller */
+.react-calendar__tile {
+  height: 60px !important;
+  width: 100% !important;
+  border-radius: 8px !important;
+  margin: 0 !important;
+  padding: 8px 6px !important;
+  font-weight: 600 !important;
+  color: #4544b4 !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  border: 2px solid #e0e0e0 !important;
+  background-color: #ffffff !important;
+  cursor: pointer !important;
+}
+
+.react-calendar__tile--active {
+  background-color: #0d07c0 !important;
+  color: white !important;
+  border-color: #0d07c0 !important;
+  box-shadow: 0 4px 8px rgba(13, 7, 192, 0.3) !important;
+}
+
+.react-calendar__tile--disabled {
+  color: #ccc !important;
+  cursor: not-allowed !important;
+  background-color: #f9f9f9 !important;
+  border-color: #f0f0f0 !important;
+  opacity: 0.5 !important;
+}
+
+.react-calendar__tile:enabled:hover,
+.react-calendar__tile:enabled:focus {
+  background-color: #67bce0 !important;
+  color: white !important;
+  border-color: #67bce0 !important;
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(103, 188, 224, 0.4) !important;
+}
+
+/* Marked attendance tiles */
+.attendance-marked-tile {
+  border: 3px solid #67bce0 !important;
+  background-color: #e3f2fd !important;
+  font-weight: 700 !important;
+}
+
+/* Date number styling - smaller */
+.react-calendar__tile abbr {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  margin-bottom: 4px;
+}
+
+/* Attendance Status inside Calendar - compact */
+.attendance-tile-status {
+  margin-top: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  text-align: center;
+  user-select: none;
+  width: 100%;
+  padding: 2px 4px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.attendance-present {
+  color: #fff;
+  background-color: #2e7d32;
+  font-weight: 700;
+}
+
+.attendance-leave {
+  color: #fff;
+  background-color: #d32f2f;
+  font-weight: 700;
+}
+
+.attendance-selected {
+  color: #fff !important;
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Button Group */
+.attendance-btn-group {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+}
+
+.attendance-btn-group.mobile {
+  flex-direction: column;
+}
+
+/* Action Buttons */
+.attendance-btn {
+  background-color: #67bce0 !important;
+  color: #000 !important;
+  border-radius: 60px !important;
+  border: 3px solid #000 !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2) !important;
+  width: 100%;
+  padding: 12px 20px !important;
+  transition: all 0.3s ease !important;
+}
+
+.attendance-btn:hover {
+  background-color: #fff !important;
+  color: #67bce0 !important;
+  border-color: #67bce0 !important;
+  transform: translateY(-2px);
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+.attendance-check-in-btn {
+  background-color: #4caf50 !important;
+  border-color: #2e7d32 !important;
+  color: #fff !important;
+}
+
+.attendance-check-in-btn:hover {
+  background-color: #fff !important;
+  color: #4caf50 !important;
+  border-color: #4caf50 !important;
+}
+
+.attendance-check-out-btn {
+  background-color: #ff9800 !important;
+  border-color: #f57c00 !important;
+  color: #fff !important;
+}
+
+.attendance-check-out-btn:hover {
+  background-color: #fff !important;
+  color: #ff9800 !important;
+  border-color: #ff9800 !important;
+}
+
+.attendance-leave-btn {
+  background-color: transparent !important;
+  border: 3px solid #f44336 !important;
+  color: #f44336 !important;
+}
+
+.attendance-leave-btn:hover {
+  background-color: #f44336 !important;
+  color: #fff !important;
+  border-color: #f44336 !important;
+}
+
+/* Cancel Button */
+.attendance-cancel-btn {
+  background-color: #67bce0 !important;
+  color: #000 !important;
+  border-radius: 60px !important;
+  border: 3px solid #000 !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2) !important;
+  margin-top: 16px !important;
+  width: 100;
+  padding: 12px 20px !important;
+}
+
+.attendance-cancel-btn:hover {
+  background-color: #fff !important;
+  color: #67bce0 !important;
+  border-color: #67bce0 !important;
+  transform: translateY(-2px);
+}
+
+/* Table */
+.attendance-table-header {
+  background-color: #cfe2f3;
+}
+
+.attendance-table-header .MuiTableCell-root {
+  font-weight: 700 !important;
+  color: #4544b4 !important;
+  font-size: 15px !important;
+  padding: 16px !important;
+}
+
+.MuiTableCell-root {
+  padding: 14px !important;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-present {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.status-leave {
+  background-color: #ffcdd2;
+  color: #d32f2f;
+}
+
+/* Row Animations */
+.recently-updated-row {
+  animation: highlight-fade 2s ease-in-out;
+}
+
+.checkout-time-updated {
+  color: #2e7d32;
+  font-weight: 700;
+  animation: pulse 1s ease-in-out;
+}
+
+@keyframes highlight-fade {
+  0% {
+    background-color: #e8f5e9;
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 960px) {
+  .react-calendar__tile {
+    height: 55px !important;
+  }
+  
+  .react-calendar__tile abbr {
+    font-size: 15px !important;
+  }
+  
+  .attendance-tile-status {
+    font-size: 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .attendance-calendar-card {
+    padding: 12px;
+  }
+  
+  .react-calendar__tile {
+    height: 50px !important;
+    padding: 6px 4px !important;
+  }
+  
+  .react-calendar__tile abbr {
+    font-size: 14px !important;
+  }
+  
+  .attendance-tile-status {
+    font-size: 8px;
+    padding: 2px 3px;
+  }
+  
+  .react-calendar__month-view__days {
+    gap: 4px !important;
+  }
+  
+  .react-calendar__month-view__weekdays {
+    gap: 4px !important;
+  }
+}
