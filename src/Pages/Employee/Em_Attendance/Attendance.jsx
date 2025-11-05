@@ -40,7 +40,7 @@ export default function Attendance() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   // ✅ FIXED: Changed to port 5001
-  const API_URL = "http://localhost:5001";
+  const API_URL = "http://127.0.0.1:5001";
 
   // Get employee ID from localStorage
   const empId = localStorage.getItem("emp_id") || "";
