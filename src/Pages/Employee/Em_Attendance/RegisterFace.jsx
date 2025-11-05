@@ -22,7 +22,7 @@ export default function EmployeeRegistration() {
   const [isProcessing, setIsProcessing] = useState(false);
   const webcamRef = useRef(null);
 
-  const API_URL = "http://localhost:5000";
+  const API_URL = "http://localhost:5001";
 
   const handleInputChange = (e) => {
     setFormData({
@@ -47,20 +47,20 @@ export default function EmployeeRegistration() {
     setIsProcessing(true);
 
     try {
-      const response = await axios.post(`${API_URL}/register_employee`, {
+      // FIXED: Changed endpoint from /register_employee to /register_face
+      const response = await axios.post(`${API_URL}/register_face`, {
         emp_id: formData.emp_id,
-        name: formData.name,
-        email: formData.email,
         image: capturedImage,
       });
 
       if (response.data.success) {
-        toast.success(response.data.message);
+        toast.success(response.data.message || "Face registered successfully!");
         // Reset form
         setFormData({ emp_id: "", name: "", email: "" });
         setCapturedImage(null);
       }
     } catch (error) {
+      console.error("Registration error:", error);
       if (error.response) {
         toast.error(error.response.data.error || "Registration failed");
       } else {
@@ -92,10 +92,10 @@ export default function EmployeeRegistration() {
         }}
       >
         <Typography variant="h4" align="center" gutterBottom sx={{ color: "#67bce0", fontWeight: 700 }}>
-          Employee Registration
+          Employee Face Registration
         </Typography>
         <Typography variant="body2" align="center" color="textSecondary" sx={{ mb: 3 }}>
-          Register with face recognition for attendance tracking
+          Register your face for attendance tracking. Make sure you're already registered as an employee in Firebase.
         </Typography>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -107,6 +107,7 @@ export default function EmployeeRegistration() {
             fullWidth
             required
             variant="outlined"
+            helperText="Enter your existing employee ID from Firebase"
             sx={{
               "& .MuiOutlinedInput-root": {
                 "&:hover fieldset": {
@@ -125,8 +126,8 @@ export default function EmployeeRegistration() {
             value={formData.name}
             onChange={handleInputChange}
             fullWidth
-            required
             variant="outlined"
+            helperText="Optional - for display purposes only"
             sx={{
               "& .MuiOutlinedInput-root": {
                 "&:hover fieldset": {
@@ -147,6 +148,7 @@ export default function EmployeeRegistration() {
             onChange={handleInputChange}
             fullWidth
             variant="outlined"
+            helperText="Optional - for display purposes only"
             sx={{
               "& .MuiOutlinedInput-root": {
                 "&:hover fieldset": {
@@ -282,7 +284,7 @@ export default function EmployeeRegistration() {
           <Button
             variant="contained"
             onClick={handleSubmit}
-            disabled={isProcessing || !capturedImage || !formData.emp_id || !formData.name}
+            disabled={isProcessing || !capturedImage || !formData.emp_id}
             sx={{
               mt: 2,
               backgroundColor: "#67bce0",
@@ -304,10 +306,10 @@ export default function EmployeeRegistration() {
             {isProcessing ? (
               <>
                 <CircularProgress size={20} sx={{ mr: 1, color: "white" }} />
-                Registering...
+                Registering Face...
               </>
             ) : (
-              "✓ Register Employee"
+              "✓ Register Face for Attendance"
             )}
           </Button>
         </Box>

@@ -39,10 +39,11 @@ export default function Attendance() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const API_URL = "http://localhost:5000";
+  // ✅ FIXED: Changed to port 5001
+  const API_URL = "http://localhost:5001";
 
-  // Get employee ID from localStorage or context (adjust as needed)
-  const empId = localStorage.getItem("emp_id") || "EMP001";
+  // Get employee ID from localStorage
+  const empId = localStorage.getItem("emp_id") || "";
 
   const today = new Date();
   const isSameDay = (d1, d2) =>
@@ -52,17 +53,24 @@ export default function Attendance() {
 
   // Fetch attendance data on component mount
   useEffect(() => {
+    if (!empId) {
+      toast.error("Employee ID not found. Please login again.");
+      navigate("/login");
+      return;
+    }
     fetchAttendanceData();
-  }, []);
+  }, [empId]);
 
   const fetchAttendanceData = async () => {
     try {
       setIsLoading(true);
+      console.log("📡 Fetching attendance for:", empId);
+      
       const response = await axios.get(`${API_URL}/get_attendance`, {
         params: { emp_id: empId },
       });
       
-      console.log("Fetched attendance data:", response.data); // Debug log
+      console.log("✅ Fetched attendance data:", response.data);
       
       if (response.data && response.data.records) {
         const formattedData = response.data.records.map((record) => ({
@@ -74,12 +82,12 @@ export default function Attendance() {
         }));
         
         setAttendanceData(formattedData);
-        console.log("Formatted attendance data:", formattedData); // Debug log
+        console.log("📊 Formatted attendance data:", formattedData);
       } else {
         setAttendanceData([]);
       }
     } catch (error) {
-      console.error("Error fetching attendance:", error);
+      console.error("❌ Error fetching attendance:", error);
       toast.error("Failed to fetch attendance data");
       setAttendanceData([]);
     } finally {
@@ -101,6 +109,11 @@ export default function Attendance() {
       return;
     }
 
+    if (!empId) {
+      toast.error("Employee ID not found. Please login again.");
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
@@ -112,14 +125,20 @@ export default function Attendance() {
         return;
       }
 
-      console.log("Sending attendance request:", currentAction); // Debug log
+      console.log("📤 Sending attendance request:", {
+        action: currentAction,
+        emp_id: empId,
+        imageLength: imageSrc.length
+      });
 
+      // ✅ FIXED: Added emp_id to the request
       const response = await axios.post(`${API_URL}/mark_attendance`, {
         image: imageSrc,
         action: currentAction,
+        emp_id: empId,  // ✅ This was missing!
       });
 
-      console.log("Attendance response:", response.data); // Debug log
+      console.log("✅ Attendance response:", response.data);
 
       if (response.data.success) {
         toast.success(response.data.message);
@@ -131,10 +150,17 @@ export default function Attendance() {
         }, 500);
       }
     } catch (error) {
-      console.error("Attendance error:", error); // Debug log
+      console.error("❌ Attendance error:", error);
+      
       if (error.response) {
-        toast.error(error.response.data.error || "Face recognition failed");
+        const errorMsg = error.response.data.error || "Face recognition failed";
+        console.error("Server error:", error.response.data);
+        toast.error(errorMsg);
+      } else if (error.request) {
+        console.error("Network error - no response from server");
+        toast.error("Cannot connect to server. Please check if Flask is running on port 5001.");
       } else {
+        console.error("Request error:", error.message);
         toast.error("Network error. Please try again.");
       }
     } finally {
@@ -143,6 +169,12 @@ export default function Attendance() {
   };
 
   const handleCheckIn = () => {
+    if (!empId) {
+      toast.error("Employee ID not found. Please login again.");
+      navigate("/login");
+      return;
+    }
+
     const dateStr = selectedDate.toDateString();
     const exists = attendanceData.find((d) => d.date === dateStr);
     
@@ -156,6 +188,12 @@ export default function Attendance() {
   };
 
   const handleCheckOut = () => {
+    if (!empId) {
+      toast.error("Employee ID not found. Please login again.");
+      navigate("/login");
+      return;
+    }
+
     const dateStr = selectedDate.toDateString();
     const exists = attendanceData.find((d) => d.date === dateStr);
     
@@ -399,6 +437,28 @@ export default function Attendance() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Debug Info Box (only in development) */}
+      {process.env.NODE_ENV === "development" && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: 10,
+            right: 10,
+            p: 2,
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            borderRadius: 2,
+            border: "1px solid #ccc",
+            fontSize: "12px",
+            maxWidth: "300px",
+          }}
+        >
+          <div><strong>Debug Info:</strong></div>
+          <div>API URL: {API_URL}</div>
+          <div>Employee ID: {empId || "Not set"}</div>
+          <div>Records: {attendanceData.length}</div>
+        </Box>
+      )}
     </Box>
   );
 }
