@@ -1,0 +1,380 @@
+/* Ad_Attendance.css */
+
+/* Main Container */
+.ad-att-main-container {
+  padding: 32px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+.ad-att-main-container-mobile {
+  padding: 16px;
+}
+
+/* Header Section */
+.ad-att-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.ad-att-page-title {
+  font-weight: bold;
+  color: #4445B4;
+}
+
+.ad-att-header-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 0 !important;
+}
+
+.ad-att-leave-mgmt-btn {
+  background-color: #74C0E3 !important;
+  border: 2px solid #000000 !important;
+  border-radius: 25px !important;
+  color: #000 !important;
+  padding: 8px 32px !important;
+  text-transform: none !important;
+  font-weight: bold !important;
+  position: relative;
+}
+
+.ad-att-leave-mgmt-btn:hover {
+  background-color: #5AACCE !important;
+}
+
+.ad-att-notification-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #f44336;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  animation: ad-att-pulse-animation 2s infinite;
+}
+
+@keyframes ad-att-pulse-animation {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 4px rgba(244, 67, 54, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(244, 67, 54, 0);
+  }
+}
+
+.ad-att-refresh-icon-btn {
+  background-color: #74C0E3 !important;
+  width: 48px;
+  height: 48px;
+}
+
+.ad-att-refresh-icon-btn:hover {
+  background-color: #5AACCE !important;
+}
+
+/* Statistics Cards */
+.ad-att-stats-grid-container {
+  margin-bottom: 32px;
+}
+
+.ad-att-stats-single-card {
+  height: 100%;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ad-att-stats-single-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.ad-att-stats-card-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ad-att-stats-icon-large {
+  font-size: 48px;
+  opacity: 0.3;
+}
+
+/* Filter Section */
+.ad-att-filter-wrapper {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.ad-att-filter-form-control {
+  min-width: 200px;
+}
+
+.ad-att-filter-text-field {
+  min-width: 200px;
+}
+
+/* Table Styles */
+.ad-att-table-main-container {
+  margin-top: 20px;
+  margin-bottom: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ad-att-table-header-cell {
+  background-color: #4445B4;
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 16px;
+}
+
+.ad-att-table-data-row {
+  background-color: #fff;
+}
+
+.ad-att-table-data-row:nth-of-type(even) {
+  background-color: #f9f9f9;
+}
+
+.ad-att-table-data-row:hover {
+  background-color: #f0f0ff;
+}
+
+.ad-att-status-display-box {
+  display: flex;
+  align-items: center;
+}
+
+.ad-att-status-indicator-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.ad-att-action-buttons-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.ad-att-view-icon-button {
+  color: #4445B4;
+}
+
+/* Loading and Empty States */
+.ad-att-loading-cell-content {
+  padding: 40px;
+  text-align: center;
+}
+
+.ad-att-loading-spinner-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ad-att-empty-state-cell {
+  padding: 40px;
+  text-align: center;
+}
+
+/* Employee Cards Section */
+.ad-att-employees-section-title {
+  font-weight: bold;
+  color: #4445B4;
+  margin-bottom: 24px;
+}
+
+.ad-att-employees-cards-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.ad-att-single-employee-card {
+  width: 220px;
+  height: 180px;
+  border-radius: 12px;
+  border: 2px solid #74C0E3;
+  position: relative;
+  background-color: #ffffff;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ad-att-single-employee-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ad-att-employee-card-top-section {
+  height: 50px;
+  background-color: #f2f2f2;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.ad-att-employee-avatar-circle {
+  width: 40px; 
+  height: 40px;          
+  background-color: #74C0E3;
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  border: 3px solid white;
+  font-size: 18px;  
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  border-radius: 50%;
+}
+
+.ad-att-employee-status-position {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.ad-att-employee-status-dot-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.ad-att-employee-info-section {
+  margin-top: 35px;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.ad-att-employee-name-text {
+  font-weight: bold;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ad-att-employee-designation-text {
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ad-att-employee-id-text {
+  font-size: 11px;
+  color: #999;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Dialog Styles */
+.ad-att-dialog-header-title {
+  background-color: #4445B4;
+  color: #fff;
+}
+
+.ad-att-dialog-content-section {
+  padding: 24px;
+}
+
+.ad-att-dialog-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.ad-att-dialog-field-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.ad-att-dialog-field-value {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Status Color Classes */
+.ad-att-status-color-present {
+  background-color: #4CAF50;
+}
+
+.ad-att-status-color-absent {
+  background-color: #f44336;
+}
+
+.ad-att-status-color-leave {
+  background-color: #FF9800;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .ad-att-main-container {
+    padding: 16px;
+  }
+
+  .ad-att-header-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .ad-att-header-actions {
+    width: 100%;
+  }
+
+  .ad-att-filter-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ad-att-filter-form-control,
+  .ad-att-filter-text-field {
+    width: 100%;
+  }
+
+  .ad-att-employees-cards-wrapper {
+    justify-content: center;
+  }
+
+  .ad-att-dialog-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
