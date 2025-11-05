@@ -1,5 +1,5 @@
 // src/pages/Employee/Leave.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -25,12 +25,17 @@ import {
   Divider,
   useMediaQuery,
   useTheme,
+  CircularProgress,
+  Chip,
+  IconButton,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { toast } from "react-toastify";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-// Custom calendar styles (same as your Attendance calendar)
 const calendarStyles = {
   calendarContainer: {
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -46,24 +51,74 @@ const calendarStyles = {
 export default function Leave() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [openDialog, setOpenDialog] = useState(false);
-  const [leaveList, setLeaveList] = useState([
-    {
-      employeeId: "EMP001",
-      leaveType: "Sick Off",
-      designation: "Software Engineer",
-      startDate: "2025-08-02",
-      endDate: "2025-08-02",
-      date: "2025-08-02",
-      status: "Pending",
-    },
-  ]);
+  const [leaveList, setLeaveList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const userRole = "HR";
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const navigate = useNavigate();
+
+  const API_URL = "http://127.0.0.1:5001";
+  const empId = localStorage.getItem("emp_id") || "";
+  const empName = localStorage.getItem("name") || "";
+  const empDesignation = localStorage.getItem("designation") || "";
+  const empDepartment = localStorage.getItem("department") || "";
+
+  const [formData, setFormData] = useState({
+    employeeId: empId,
+    leaveType: "",
+    designation: empDesignation,
+    startDate: "",
+    endDate: "",
+    reason: "",
+  });
+
+  useEffect(() => {
+    if (!empId) {
+      toast.error("Employee ID not found. Please login again.");
+      navigate("/login");
+      return;
+    }
+    fetchLeaveRequests();
+  }, [empId]);
+
+  const fetchLeaveRequests = async () => {
+    try {
+      setIsLoading(true);
+      console.log("📡 Fetching leave requests for:", empId);
+
+      const response = await axios.get(`${API_URL}/get_leave_requests`, {
+        params: {
+          emp_id: empId,
+          role: "employee",
+        },
+      });
+
+      console.log("✅ Leave requests fetched:", response.data);
+
+      if (response.data && response.data.requests) {
+        setLeaveList(response.data.requests);
+      } else {
+        setLeaveList([]);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching leave requests:", error);
+      toast.error("Failed to fetch leave requests");
+      setLeaveList([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleDateClick = (date) => {
     setSelectedDate(date);
+    const formattedDate = date.toISOString().split("T")[0];
+    setFormData((prev) => ({
+      ...prev,
+      startDate: formattedDate,
+      endDate: formattedDate,
+    }));
     setOpenDialog(true);
   };
 
@@ -72,50 +127,118 @@ export default function Leave() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const [formData, setFormData] = useState({
-    employeeId: "",
-    leaveType: "",
-    designation: "",
-    startDate: "",
-    endDate: "",
-  });
+  const handleSubmit = async () => {
+    const { leaveType, designation, startDate, endDate, reason } = formData;
 
-  const handleSubmit = () => {
-    const { employeeId, leaveType, designation, startDate, endDate } = formData;
-    if (!employeeId || !leaveType || !designation || !startDate || !endDate) {
+    if (!leaveType || !designation || !startDate || !endDate) {
       toast.error("Please fill all required fields");
       return;
     }
 
-    const newLeave = {
-      ...formData,
-      date: startDate === endDate ? startDate : `${startDate} to ${endDate}`,
-      status: "Pending",
-    };
+    // Validate dates
+    if (new Date(startDate) > new Date(endDate)) {
+      toast.error("End date cannot be before start date");
+      return;
+    }
 
-    setLeaveList((prev) => [...prev, newLeave]);
-    setOpenDialog(false);
-    toast.success("Leave request submitted");
+    try {
+      setIsSubmitting(true);
+      console.log("📤 Submitting leave request:", formData);
 
-    setFormData({
-      employeeId: "",
-      leaveType: "",
-      designation: "",
-      startDate: "",
-      endDate: "",
-    });
+      const response = await axios.post(`${API_URL}/submit_leave`, {
+        emp_id: empId,
+        leave_type: leaveType,
+        start_date: startDate,
+        end_date: endDate,
+        reason: reason,
+      });
+
+      console.log("✅ Leave submitted:", response.data);
+
+      if (response.data.success) {
+        toast.success("Leave request submitted successfully!");
+        setOpenDialog(false);
+        
+        // Reset form
+        setFormData({
+          employeeId: empId,
+          leaveType: "",
+          designation: "",
+          startDate: "",
+          endDate: "",
+          reason: "",
+        });
+
+        // Refresh leave list
+        await fetchLeaveRequests();
+      }
+    } catch (error) {
+      console.error("❌ Submit leave error:", error);
+      
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.error || "Failed to submit leave request");
+      } else {
+        toast.error("Network error. Please check if the server is running.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleStatusChange = (index, newStatus) => {
-    const updated = [...leaveList];
-    updated[index].status = newStatus;
-    setLeaveList(updated);
-    toast.success(`Leave ${newStatus}`);
+  const handleDeleteLeave = async (leaveId) => {
+    if (!window.confirm("Are you sure you want to delete this leave request?")) {
+      return;
+    }
+
+    try {
+      console.log("🗑️ Deleting leave:", leaveId);
+
+      const response = await axios.post(`${API_URL}/delete_leave`, {
+        leave_id: leaveId,
+        emp_id: empId,
+      });
+
+      if (response.data.success) {
+        toast.success("Leave request deleted successfully!");
+        await fetchLeaveRequests();
+      }
+    } catch (error) {
+      console.error("❌ Delete leave error:", error);
+      
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.error || "Failed to delete leave request");
+      } else {
+        toast.error("Network error. Please try again.");
+      }
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Approved":
+        return "success";
+      case "Rejected":
+        return "error";
+      case "Pending":
+        return "warning";
+      default:
+        return "default";
+    }
+  };
+
+  const formatDateRange = (startDate, endDate) => {
+    const start = new Date(startDate).toLocaleDateString();
+    const end = new Date(endDate).toLocaleDateString();
+    return start === end ? start : `${start} - ${end}`;
   };
 
   return (
     <Box p={isMobile ? 2 : 4} display="flex" justifyContent="center" bgcolor="#f5f7fa" minHeight="100vh">
       <Box maxWidth="1200px" width="100%">
+        <Typography variant="h4" gutterBottom sx={{ mb: 3, fontWeight: "bold", color: "#4544B4" }}>
+          Leave Management
+        </Typography>
+
         <Grid container spacing={4} justifyContent="center">
           {/* Calendar Section */}
           <Grid item xs={12} md={4}>
@@ -132,7 +255,6 @@ export default function Leave() {
                 onClickDay={handleDateClick}
                 value={selectedDate}
                 calendarType="gregory"
-                calendarClassName="custom-calendar"
                 nextLabel="›"
                 prevLabel="‹"
                 next2Label={null}
@@ -154,61 +276,82 @@ export default function Leave() {
 
           {/* Leave Table Section */}
           <Grid item xs={12} md={8}>
-            <Typography variant="h6" gutterBottom>
-              All Leaves
-            </Typography>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+              <Typography variant="h6">My Leave Requests</Typography>
+              <Button
+                variant="contained"
+                onClick={() => setOpenDialog(true)}
+                sx={{
+                  bgcolor: "#67BCE0",
+                  ":hover": { bgcolor: "#5AACCE" },
+                  borderRadius: "60px",
+                  border: "2px solid #000000",
+                  color: "#000000",
+                  textTransform: "none",
+                  fontWeight: "bold",
+                }}
+              >
+                + New Leave
+              </Button>
+            </Box>
+
             <TableContainer component={Paper}>
               <Table>
                 <TableHead sx={{ background: "#cfe2f3" }}>
                   <TableRow>
-                    <TableCell>Date</TableCell>
+                    <TableCell>Date Range</TableCell>
                     <TableCell>Leave Type</TableCell>
                     <TableCell>Status</TableCell>
+                    <TableCell>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {leaveList.map((leave, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell>{leave.date}</TableCell>
-                      <TableCell>{leave.leaveType}</TableCell>
-                      <TableCell>
-                        {leave.status === "Pending" && userRole === "HR" ? (
-                          <Box display="flex" gap={1}>
-                            <Button
-                              size="small"
-                              color="success"
-                              variant="outlined"
-                              onClick={() => handleStatusChange(idx, "Accepted")}
-                            >
-                              Accept
-                            </Button>
-                            <Button
-                              size="small"
-                              color="error"
-                              variant="outlined"
-                              onClick={() => handleStatusChange(idx, "Rejected")}
-                            >
-                              Reject
-                            </Button>
-                          </Box>
-                        ) : (
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color:
-                                leave.status === "Accepted"
-                                  ? "green"
-                                  : leave.status === "Rejected"
-                                  ? "red"
-                                  : "orange",
-                            }}
-                          >
-                            {leave.status}
-                          </Typography>
-                        )}
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={4} align="center">
+                        <CircularProgress size={24} />
+                        <Typography sx={{ ml: 2 }}>Loading...</Typography>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : leaveList.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} align="center">
+                        No leave requests found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    leaveList.map((leave) => (
+                      <TableRow key={leave.id}>
+                        <TableCell>{formatDateRange(leave.start_date, leave.end_date)}</TableCell>
+                        <TableCell>{leave.leave_type}</TableCell>
+                        <TableCell>
+                          <Chip
+                            label={leave.status}
+                            color={getStatusColor(leave.status)}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {leave.status === "Pending" && (
+                            <IconButton
+                              color="error"
+                              size="small"
+                              onClick={() => handleDeleteLeave(leave.id)}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          )}
+                          {leave.status !== "Pending" && (
+                            <Typography variant="caption" color="textSecondary">
+                              {leave.reviewed_at
+                                ? `Reviewed: ${new Date(leave.reviewed_at).toLocaleDateString()}`
+                                : "-"}
+                            </Typography>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -216,7 +359,7 @@ export default function Leave() {
         </Grid>
 
         {/* Leave Request Dialog */}
-        <Dialog open={openDialog} onClose={() => setOpenDialog(false)} fullWidth maxWidth="sm">
+        <Dialog open={openDialog} onClose={() => !isSubmitting && setOpenDialog(false)} fullWidth maxWidth="sm">
           <DialogTitle
             sx={{
               color: "#67BCE0",
@@ -249,19 +392,12 @@ export default function Leave() {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label={
-                      <Box component="span">
-                        Employee ID
-                        <Box component="span" sx={{ color: "red" }}>
-                          *
-                        </Box>
-                      </Box>
-                    }
+                    label="Employee ID"
                     name="employeeId"
                     value={formData.employeeId}
-                    onChange={handleInputChange}
+                    disabled
                     variant="outlined"
-                    sx={{ bgcolor: "#fff" }}
+                    sx={{ bgcolor: "#f5f5f5" }}
                   />
                 </Grid>
 
@@ -360,6 +496,19 @@ export default function Leave() {
                     onChange={handleInputChange}
                   />
                 </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Reason (Optional)"
+                    name="reason"
+                    value={formData.reason}
+                    onChange={handleInputChange}
+                    multiline
+                    rows={3}
+                    variant="outlined"
+                  />
+                </Grid>
               </Grid>
             </Box>
           </DialogContent>
@@ -377,9 +526,10 @@ export default function Leave() {
               <Button
                 variant="contained"
                 onClick={handleSubmit}
+                disabled={isSubmitting}
                 sx={{
                   bgcolor: "#67BCE0",
-                  ":hover": { bgcolor: "#ffffff" },
+                  ":hover": { bgcolor: "#5AACCE" },
                   borderRadius: "60px",
                   border: "3px solid #000000",
                   color: "#000000",
@@ -388,15 +538,16 @@ export default function Leave() {
                   width: { xs: "100%", sm: "auto" },
                 }}
               >
-                Submit
+                {isSubmitting ? <CircularProgress size={24} /> : "Submit"}
               </Button>
 
               <Button
                 variant="outlined"
                 onClick={() => setOpenDialog(false)}
+                disabled={isSubmitting}
                 sx={{
-                  bgcolor: "#67BCE0",
-                  ":hover": { bgcolor: "#ffffff" },
+                  bgcolor: "#ffffff",
+                  ":hover": { bgcolor: "#f5f5f5" },
                   borderRadius: "60px",
                   border: "3px solid #000000",
                   color: "#000000",
@@ -410,10 +561,9 @@ export default function Leave() {
             </Box>
           </DialogActions>
         </Dialog>
-
       </Box>
 
-      {/* Add custom CSS for react-calendar */}
+      {/* Custom CSS for react-calendar */}
       <style>
         {`
           .react-calendar {
