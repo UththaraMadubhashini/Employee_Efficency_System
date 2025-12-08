@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -12,77 +13,87 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
   DialogActions,
+  CircularProgress,
+  Alert,
+  Chip,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  TableContainer,
 } from '@mui/material';
+import { CheckCircle, HourglassEmpty, Warning } from '@mui/icons-material';
+import { toast } from "react-toastify";
 
-const topTableData = [
-  { id: 'T001', task: 'Room Cleaning' },
-  { id: 'T002', task: 'Fix AC Unit' },
-  { id: 'T003', task: 'Reception Backup' },
-  { id: 'T004', task: 'Room Service' },
-  { id: 'T005', task: 'Inventory Audit' },
-];
-
-const bottomTableData = [
-  {
-    id: 'T001',
-    title: 'Room Cleaning',
-    description: 'Clean Room 203 and restock toiletries',
-    start: '2025-08-01',
-    end: '2025-08-01',
-    due: '2025-08-01',
-    status: 'In Progress',
-  },
-  {
-    id: 'T002',
-    title: 'Fix AC Unit',
-    description: 'Repair AC unit in Suite 502',
-    start: '2025-08-01',
-    end: '2025-08-02',
-    due: '2025-08-02',
-    status: 'Pending',
-  },
-  {
-    id: 'T003',
-    title: 'Reception Backup',
-    description: 'Assist with morning shift at reception',
-    start: '2025-08-01',
-    end: '2025-08-01',
-    due: '2025-08-01',
-    status: 'Completed',
-  },
-  {
-    id: 'T004',
-    title: 'Room Service',
-    description: 'Deliver lunch order to Room 310',
-    start: '2025-08-01',
-    end: '2025-08-01',
-    due: '2025-08-01',
-    status: 'In Review',
-  },
-  {
-    id: 'T005',
-    title: 'Inventory Audit',
-    description: 'Check and record minibar stock in all rooms',
-    start: '2025-08-01',
-    end: '2025-08-02',
-    due: '2025-08-02',
-    status: 'In Progress',
-  },
-];
+const API_BASE_URL = "http://127.0.0.1:5001";
 
 const Task = () => {
+  const [tasks, setTasks] = useState([]);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [successMsg, setSuccessMsg] = useState(null);
+  const [updating, setUpdating] = useState(false);
+  const navigate = useNavigate();
 
-  const handleCheckboxChange = (id) => {
-    setSelectedTaskId(id);
+
+  const empId = localStorage.getItem("emp_id") || "";
+
+  // Fetch tasks on component mount
+  useEffect(() => {
+    if (!empId) {
+      toast.error("Employee ID not found. Please login again.");
+      navigate("/login");
+      return;
+    }
+    fetchTasks();
+  }, [empId]);
+
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      console.log("📡 Fetching tasks for:", empId);
+
+      const response = await fetch(
+        `${API_BASE_URL}/get_tasks?emp_id=${empId}&role=employee`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch tasks");
+      }
+
+      const data = await response.json();
+
+      console.log("✅ Fetched tasks data:", data);
+
+      if (data.success) {
+        setTasks(data.tasks);
+        console.log("📊 Total tasks:", data.tasks.length);
+      } else {
+        throw new Error(data.error || "Failed to load tasks");
+      }
+    } catch (err) {
+      console.error("❌ Task fetch error:", err);
+      setError(err.message);
+      toast.error("Failed to fetch tasks");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleOkClick = () => {
+  const handleCheckboxChange = (taskId) => {
+    setSelectedTaskId(taskId);
+  };
+
+  const handleViewDetails = () => {
     if (selectedTaskId) {
       setOpenDialog(true);
+    } else {
+      toast.warning("Please select a task first");
     }
   };
 
@@ -90,144 +101,538 @@ const Task = () => {
     setOpenDialog(false);
   };
 
-  const selectedTask = bottomTableData.find((task) => task.id === selectedTaskId);
+  const handleUpdateStatus = async (newStatus) => {
+    try {
+      setUpdating(true);
+      
+      console.log("📤 Updating task status:", {
+        task_id: selectedTaskId,
+        status: newStatus
+      });
+
+      const response = await fetch(`${API_BASE_URL}/update_task_status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          task_id: selectedTaskId,
+          status: newStatus,
+        }),
+      });
+
+      const data = await response.json();
+
+      console.log("✅ Update response:", data);
+
+      if (data.success) {
+        toast.success(`Task marked as ${newStatus}`);
+        setSuccessMsg(`Task marked as ${newStatus}`);
+        setOpenDialog(false);
+        setSelectedTaskId(null);
+        
+        // Refresh tasks after a brief delay
+        setTimeout(() => {
+          fetchTasks();
+        }, 500);
+      } else {
+        setError(data.error || "Failed to update task");
+        toast.error(data.error || "Failed to update task");
+      }
+    } catch (err) {
+      console.error("❌ Update error:", err);
+      setError("Failed to update task status");
+      toast.error("Failed to update task status");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Completed':
+        return '#4CAF50';
+      case 'In Progress':
+        return '#2196F3';
+      case 'Overdue':
+        return '#F44336';
+      case 'Pending':
+        return '#FF9800';
+      default:
+        return '#757575';
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'Completed':
+        return <CheckCircle />;
+      case 'In Progress':
+        return <HourglassEmpty />;
+      case 'Overdue':
+        return <Warning />;
+      default:
+        return <HourglassEmpty />;
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'Critical':
+        return '#D32F2F';
+      case 'High':
+        return '#F57C00';
+      case 'Medium':
+        return '#FBC02D';
+      case 'Low':
+        return '#388E3C';
+      default:
+        return '#757575';
+    }
+  };
+
+  const selectedTask = tasks.find((task) => task.task_id === selectedTaskId);
+
+  // Calculate task statistics
+  const taskStats = {
+    total: tasks.length,
+    completed: tasks.filter(t => t.status === 'Completed').length,
+    inProgress: tasks.filter(t => t.status === 'In Progress').length,
+    overdue: tasks.filter(t => t.status === 'Overdue').length,
+    pending: tasks.filter(t => t.status === 'Pending').length,
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress size={60} />
+        <Typography sx={{ ml: 2 }}>Loading tasks...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box
-  sx={{
-    minHeight: '100vh',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    py: 5,
-  }}
->
-  <Box
-    sx={{
-      width: '90%',
-      maxWidth: '1000px',
-      marginTop: '-280px',
-      overflowX: 'auto', // Added to handle table overflow on small screens
-    }}
-  >
-    {/* Top Table */}
-    <Table
       sx={{
-        border: '1px solid #ccc',
-        mb: 2,
-        minWidth: '600px', // Ensures horizontal scroll on small devices
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f5f9ff 0%, #e8f4f8 100%)',
+        py: 4,
+        px: 2,
       }}
     >
-      <TableHead sx={{ backgroundColor: '#cfe2f3' }}>
-        <TableRow>
-          <TableCell sx={{ fontSize: { xs: '12px', sm: '14px' } }}>Task ID</TableCell>
-          <TableCell sx={{ fontSize: { xs: '12px', sm: '14px' } }}>Assigned Task</TableCell>
-          <TableCell align="center" sx={{ fontSize: { xs: '12px', sm: '14px' } }}>
-            Select
-          </TableCell>
-          <TableCell align="center" sx={{ fontSize: { xs: '12px', sm: '14px' } }}>
-            Action
-          </TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {topTableData.map((row) => (
-          <TableRow key={row.id}>
-            <TableCell sx={{ fontSize: { xs: '12px', sm: '14px' } }}>{row.id}</TableCell>
-            <TableCell sx={{ fontSize: { xs: '12px', sm: '14px' } }}>{row.task}</TableCell>
-            <TableCell align="center">
-              <Checkbox
-                checked={selectedTaskId === row.id}
-                onChange={() => handleCheckboxChange(row.id)}
-              />
-            </TableCell>
-            <TableCell align="center">
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleOkClick}
-                disabled={selectedTaskId !== row.id}
-                sx={{
-                  borderRadius: 5,
-                  px: 2,
-                  borderColor: '#000',
-                  color: '#000',
-                  backgroundColor: '#b2f296',
-                  fontSize: { xs: '11px', sm: '13px' },
-                  '&:hover': {
-                    backgroundColor: '#8ae078',
-                  },
-                }}
-              >
-                OK
-              </Button>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-
-    {/* Popup Dialog */}
-    <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontSize: { xs: '16px', sm: '20px' } }}>
-        Selected Task Details
-      </DialogTitle>
-      <DialogContent>
-        {selectedTask ? (
-          <DialogContentText component="div">
-            <Typography sx={{ fontSize: { xs: '13px', sm: '15px' } }}>
-              <strong>Task ID:</strong> {selectedTask.id}
-            </Typography>
-            <Typography sx={{ fontSize: { xs: '13px', sm: '15px' } }}>
-              <strong>Title:</strong> {selectedTask.title}
-            </Typography>
-            <Typography sx={{ fontSize: { xs: '13px', sm: '15px' } }}>
-              <strong>Description:</strong> {selectedTask.description}
-            </Typography>
-            <Typography sx={{ fontSize: { xs: '13px', sm: '15px' } }}>
-              <strong>Start Date:</strong> {selectedTask.start}
-            </Typography>
-            <Typography sx={{ fontSize: { xs: '13px', sm: '15px' } }}>
-              <strong>End Date:</strong> {selectedTask.end}
-            </Typography>
-            <Typography sx={{ fontSize: { xs: '13px', sm: '15px' } }}>
-              <strong>Due Date:</strong> {selectedTask.due}
-            </Typography>
-            <Typography sx={{ fontSize: { xs: '13px', sm: '15px' } }}>
-              <strong>Status:</strong> {selectedTask.status}
-            </Typography>
-          </DialogContentText>
-        ) : (
-          <DialogContentText>No task selected.</DialogContentText>
-        )}
-      </DialogContent>
-      <DialogActions
+      <Box
         sx={{
-          px: 3,
-          pb: 2,
-          flexDirection: { xs: 'column', sm: 'row' },
-          gap: 1,
+          width: '95%',
+          maxWidth: '1200px',
+          margin: '0 auto',
         }}
       >
-        <Button
-          onClick={handleCloseDialog}
-          sx={{
-            width: { xs: '100%', sm: 'auto' },
-            textTransform: 'none',
-            bgcolor: '#67BCE0',
-            ":hover": { bgcolor: "#ffffff" },
-            borderRadius: "60px",
-            border: "3px solid #000000",
-            color: "#000000",
-            boxShadow: 2,
+        {/* Header */}
+        <Typography variant="h4" fontWeight="700" mb={3} color="#1f2a65">
+          My Tasks
+        </Typography>
+
+        {/* Error/Success Messages */}
+        {error && (
+          <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+        {successMsg && (
+          <Alert severity="success" onClose={() => setSuccessMsg(null)} sx={{ mb: 2 }}>
+            {successMsg}
+          </Alert>
+        )}
+
+        {/* Task Statistics Cards */}
+        <Grid container spacing={2} mb={4}>
+          <Grid item xs={6} sm={4} md={2.4}>
+            <Card sx={{ backgroundColor: '#e3f2fd', boxShadow: 2 }}>
+              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+                <Typography variant="h4" fontWeight="700" color="#1976d2">
+                  {taskStats.total}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Total Tasks
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6} sm={4} md={2.4}>
+            <Card sx={{ backgroundColor: '#e8f5e9', boxShadow: 2 }}>
+              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+                <Typography variant="h4" fontWeight="700" color="#4CAF50">
+                  {taskStats.completed}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Completed
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6} sm={4} md={2.4}>
+            <Card sx={{ backgroundColor: '#e1f5fe', boxShadow: 2 }}>
+              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+                <Typography variant="h4" fontWeight="700" color="#2196F3">
+                  {taskStats.inProgress}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  In Progress
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6} sm={4} md={2.4}>
+            <Card sx={{ backgroundColor: '#fff3e0', boxShadow: 2 }}>
+              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+                <Typography variant="h4" fontWeight="700" color="#FF9800">
+                  {taskStats.pending}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Pending
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={6} sm={4} md={2.4}>
+            <Card sx={{ backgroundColor: '#ffebee', boxShadow: 2 }}>
+              <CardContent sx={{ textAlign: 'center', py: 2 }}>
+                <Typography variant="h4" fontWeight="700" color="#F44336">
+                  {taskStats.overdue}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Overdue
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* Tasks Table */}
+        <TableContainer component={Paper} elevation={4}>
+          <Table sx={{ minWidth: 650 }}>
+            <TableHead sx={{ backgroundColor: '#7675E3' }}>
+              <TableRow>
+                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Task ID</TableCell>
+                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Task Name</TableCell>
+                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Priority</TableCell>
+                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Status</TableCell>
+                <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Due Date</TableCell>
+                <TableCell align="center" sx={{ color: '#fff', fontWeight: 'bold' }}>
+                  Select
+                </TableCell>
+                <TableCell align="center" sx={{ color: '#fff', fontWeight: 'bold' }}>
+                  Action
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    <CircularProgress size={24} />
+                    <span style={{ marginLeft: 10 }}>Loading...</span>
+                  </TableCell>
+                </TableRow>
+              ) : tasks.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center">
+                    <Typography variant="body1" color="text.secondary" py={3}>
+                      No tasks assigned yet
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                tasks.map((task) => (
+                  <TableRow 
+                    key={task.task_id}
+                    hover
+                    sx={{ 
+                      '&:hover': { backgroundColor: '#f5f5f5' },
+                      backgroundColor: selectedTaskId === task.task_id ? '#e3f2fd' : 'inherit'
+                    }}
+                  >
+                    <TableCell>{task.task_id}</TableCell>
+                    <TableCell>
+                      <Typography variant="body2" fontWeight="600">
+                        {task.task_name}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={task.priority}
+                        size="small"
+                        sx={{
+                          backgroundColor: getPriorityColor(task.priority),
+                          color: '#fff',
+                          fontWeight: 'bold',
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        icon={getStatusIcon(task.status)}
+                        label={task.status}
+                        size="small"
+                        sx={{
+                          backgroundColor: getStatusColor(task.status),
+                          color: '#fff',
+                          fontWeight: 'bold',
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography 
+                        variant="body2" 
+                        color={task.status === 'Overdue' ? 'error' : 'text.primary'}
+                        fontWeight={task.status === 'Overdue' ? 'bold' : 'normal'}
+                      >
+                        {new Date(task.due_date).toLocaleDateString()}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Checkbox
+                        checked={selectedTaskId === task.task_id}
+                        onChange={() => handleCheckboxChange(task.task_id)}
+                        sx={{
+                          color: '#7675E3',
+                          '&.Mui-checked': {
+                            color: '#7675E3',
+                          },
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={handleViewDetails}
+                        disabled={selectedTaskId !== task.task_id}
+                        sx={{
+                          borderRadius: '20px',
+                          px: 3,
+                          backgroundColor: '#67BCE0',
+                          color: '#000',
+                          fontWeight: 'bold',
+                          '&:hover': {
+                            backgroundColor: '#5aa8cc',
+                          },
+                          '&:disabled': {
+                            backgroundColor: '#e0e0e0',
+                          },
+                        }}
+                      >
+                        View
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {/* Task Details Dialog */}
+        <Dialog 
+          open={openDialog} 
+          onClose={handleCloseDialog} 
+          fullWidth 
+          maxWidth="md"
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              boxShadow: 10,
+            }
           }}
         >
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
-  </Box>
-</Box>
+          <DialogTitle 
+            sx={{ 
+              backgroundColor: '#7675E3', 
+              color: '#fff',
+              fontWeight: 'bold',
+              fontSize: '1.5rem'
+            }}
+          >
+            Task Details
+          </DialogTitle>
+          <DialogContent sx={{ mt: 3 }}>
+            {selectedTask ? (
+              <Box>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Paper elevation={2} sx={{ p: 2, backgroundColor: '#f8f9fa' }}>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Task ID
+                      </Typography>
+                      <Typography variant="body1" fontWeight="600">
+                        {selectedTask.task_id}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Paper elevation={2} sx={{ p: 2, backgroundColor: '#f8f9fa' }}>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Priority
+                      </Typography>
+                      <Chip
+                        label={selectedTask.priority}
+                        sx={{
+                          backgroundColor: getPriorityColor(selectedTask.priority),
+                          color: '#fff',
+                          fontWeight: 'bold',
+                        }}
+                      />
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Paper elevation={2} sx={{ p: 2, backgroundColor: '#f8f9fa' }}>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Task Name
+                      </Typography>
+                      <Typography variant="h6" fontWeight="700">
+                        {selectedTask.task_name}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Paper elevation={2} sx={{ p: 2, backgroundColor: '#f8f9fa' }}>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Description
+                      </Typography>
+                      <Typography variant="body1">
+                        {selectedTask.description || 'No description provided'}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Paper elevation={2} sx={{ p: 2, backgroundColor: '#f8f9fa' }}>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Start Date
+                      </Typography>
+                      <Typography variant="body1" fontWeight="600">
+                        {new Date(selectedTask.start_date).toLocaleDateString()}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Paper elevation={2} sx={{ p: 2, backgroundColor: '#f8f9fa' }}>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Due Date
+                      </Typography>
+                      <Typography 
+                        variant="body1" 
+                        fontWeight="600"
+                        color={selectedTask.status === 'Overdue' ? 'error' : 'inherit'}
+                      >
+                        {new Date(selectedTask.due_date).toLocaleDateString()}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} md={4}>
+                    <Paper elevation={2} sx={{ p: 2, backgroundColor: '#f8f9fa' }}>
+                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                        Status
+                      </Typography>
+                      <Chip
+                        icon={getStatusIcon(selectedTask.status)}
+                        label={selectedTask.status}
+                        sx={{
+                          backgroundColor: getStatusColor(selectedTask.status),
+                          color: '#fff',
+                          fontWeight: 'bold',
+                        }}
+                      />
+                    </Paper>
+                  </Grid>
+                  {selectedTask.assigned_by && (
+                    <Grid item xs={12}>
+                      <Paper elevation={2} sx={{ p: 2, backgroundColor: '#f8f9fa' }}>
+                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                          Assigned By
+                        </Typography>
+                        <Typography variant="body1" fontWeight="600">
+                          {selectedTask.assigned_by}
+                        </Typography>
+                      </Paper>
+                    </Grid>
+                  )}
+                </Grid>
+              </Box>
+            ) : (
+              <Typography>No task selected.</Typography>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ p: 3, gap: 2 }}>
+            {selectedTask && selectedTask.status !== 'Completed' && (
+              <>
+                {selectedTask.status === 'Pending' && (
+                  <Button
+                    variant="contained"
+                    onClick={() => handleUpdateStatus('In Progress')}
+                    disabled={updating}
+                    sx={{
+                      backgroundColor: '#2196F3',
+                      '&:hover': { backgroundColor: '#1976D2' },
+                      borderRadius: '30px',
+                      px: 3,
+                    }}
+                  >
+                    {updating ? <CircularProgress size={24} /> : 'Start Task'}
+                  </Button>
+                )}
+                {selectedTask.status === 'In Progress' && (
+                  <Button
+                    variant="contained"
+                    onClick={() => handleUpdateStatus('Completed')}
+                    disabled={updating}
+                    sx={{
+                      backgroundColor: '#4CAF50',
+                      '&:hover': { backgroundColor: '#45a049' },
+                      borderRadius: '30px',
+                      px: 3,
+                    }}
+                  >
+                    {updating ? <CircularProgress size={24} /> : 'Mark as Completed'}
+                  </Button>
+                )}
+              </>
+            )}
+            <Button
+              variant="outlined"
+              onClick={handleCloseDialog}
+              sx={{
+                borderRadius: '30px',
+                px: 3,
+                borderColor: '#000',
+                color: '#000',
+              }}
+            >
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+
+      {/* Debug Info Box (only in development) */}
+      {process.env.NODE_ENV === "development" && (
+        <Box
+          sx={{
+            position: "fixed",
+            bottom: 10,
+            right: 10,
+            p: 2,
+            backgroundColor: "rgba(255, 255, 255, 0.9)",
+            borderRadius: 2,
+            border: "1px solid #ccc",
+            fontSize: "12px",
+            maxWidth: "300px",
+          }}
+        >
+          <div><strong>Debug Info:</strong></div>
+          <div>API URL: {API_BASE_URL}</div>
+          <div>Employee ID: {empId || "Not set"}</div>
+          <div>Total Tasks: {tasks.length}</div>
+        </Box>
+      )}
+    </Box>
   );
 };
 

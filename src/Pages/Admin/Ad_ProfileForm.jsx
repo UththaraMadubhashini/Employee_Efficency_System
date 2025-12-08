@@ -47,7 +47,7 @@ export default function Ad_ProfileForm() {
     required: true,
     sx: { "& .MuiFormLabel-asterisk": { color: "red" } },
   };
-  const departments = ["HR", "Finance", "IT", "Operations", "Marketing"];
+  const departments = ["Maintenance", "Food & Beverages", "Kitchen", "Front Desk", "House Keeping"];
 
   // Watch the role field
   const selectedRole = watch("role", role);

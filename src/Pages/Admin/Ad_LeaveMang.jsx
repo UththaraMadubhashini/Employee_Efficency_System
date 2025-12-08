@@ -154,7 +154,7 @@ export default function Ad_LeaveMang() {
 
     try {
       setIsProcessing(true);
-      console.log(`📝 ${confirmAction} leave ${selectedLeave.id}`);
+      console.log(` ${confirmAction} leave ${selectedLeave.id}`);
 
       const response = await axios.post(`${API_URL}/update_leave_status`, {
         leave_id: selectedLeave.id,
@@ -168,7 +168,7 @@ export default function Ad_LeaveMang() {
         await fetchLeaveRequests();
       }
     } catch (error) {
-      console.error(`❌ ${confirmAction} error:`, error);
+      console.error(` ${confirmAction} error:`, error);
       
       if (error.response && error.response.data) {
         toast.error(error.response.data.error || `Failed to ${confirmAction.toLowerCase()} leave`);
@@ -319,23 +319,7 @@ export default function Ad_LeaveMang() {
 
       {/* Filters and Add Button */}
       <Grid container spacing={2} alignItems="center" mb={3}>
-        <Grid item xs={12} sm={3}>
-          <FormControl fullWidth>
-            <InputLabel>Department</InputLabel>
-            <Select
-              value={filters.department}
-              onChange={(e) => handleFilterChange("department", e.target.value)}
-              label="Department"
-            >
-              <MenuItem value="">All Departments</MenuItem>
-              {uniqueDepartments.map((dept) => (
-                <MenuItem key={dept} value={dept}>
-                  {dept}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Grid>
+          
         <Grid item xs={12} sm={3}>
           <FormControl fullWidth>
             <InputLabel>Employee ID</InputLabel>

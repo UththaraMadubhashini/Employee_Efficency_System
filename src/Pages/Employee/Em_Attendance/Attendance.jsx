@@ -131,20 +131,18 @@ export default function Attendance() {
         imageLength: imageSrc.length
       });
 
-      // ✅ FIXED: Added emp_id to the request
       const response = await axios.post(`${API_URL}/mark_attendance`, {
         image: imageSrc,
         action: currentAction,
-        emp_id: empId,  // ✅ This was missing!
+        emp_id: empId,
       });
 
-      console.log("✅ Attendance response:", response.data);
+      console.log("Attendance response:", response.data);
 
       if (response.data.success) {
         toast.success(response.data.message);
         setShowWebcam(false);
         
-        // Wait a bit for the database to update, then refresh
         setTimeout(async () => {
           await fetchAttendanceData();
         }, 500);

@@ -1,0 +1,236 @@
+/* Main Container */
+.task-main-container {
+  padding: 24px;
+}
+
+/* Page Title */
+.task-page-title {
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #1f2a65;
+}
+
+/* Filter Section */
+.task-filter-section {
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+/* Add Button */
+.task-add-button {
+  background-color: #67BCE0 !important;
+  color: #000 !important;
+  font-weight: bold !important;
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+
+.task-add-button:hover {
+  background-color: #5aa8cc !important;
+}
+
+/* Loading Container */
+.task-loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+/* Table Container */
+.task-table-container {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+/* Table Header */
+.task-table-header {
+  background-color: #7675E3;
+}
+
+.task-table-header-cell {
+  color: #fff !important;
+  font-weight: bold !important;
+}
+
+/* Table Row */
+.task-table-row:hover {
+  background-color: #f5f5f5;
+}
+
+/* Employee Info */
+.task-employee-name {
+  font-weight: 600;
+}
+
+.task-employee-id {
+  color: #666;
+}
+
+/* Task Name */
+.task-name {
+  font-weight: 600;
+}
+
+/* Priority and Status Chips */
+.task-priority-chip,
+.task-status-chip {
+  font-weight: bold !important;
+}
+
+/* Overdue Date */
+.task-overdue-date {
+  color: #F44336 !important;
+  font-weight: bold !important;
+}
+
+/* No Data Message */
+.task-no-data {
+  color: #666;
+  padding: 24px 0;
+}
+
+/* Form Container */
+.task-form-container {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  background-color: #ffffff;
+  border: 5px solid #67BCE0;
+  border-radius: 20px;
+}
+
+/* Required Asterisk */
+.task-required-asterisk {
+  color: red;
+}
+
+/* Read-only Field */
+.task-readonly-field {
+  background-color: #f5f5f5;
+}
+
+/* Dialog Titles */
+.task-dialog-title {
+  font-weight: bold !important;
+  font-size: 1.5rem !important;
+}
+
+.task-view-dialog-title {
+  background-color: #7675E3 !important;
+  color: #fff !important;
+  font-weight: bold !important;
+}
+
+.task-delete-dialog-title {
+  font-weight: bold !important;
+  color: #F44336 !important;
+}
+
+.task-confirm-dialog-title {
+  font-weight: bold !important;
+}
+
+/* Dialog Content */
+.task-dialog-content {
+  padding: 24px !important;
+}
+
+.task-view-dialog-content {
+  margin-top: 24px !important;
+}
+
+/* Dialog Actions */
+.task-dialog-actions {
+  padding: 16px !important;
+}
+
+/* Detail Cards in View Dialog */
+.task-detail-card {
+  padding: 16px;
+  background-color: #f8f9fa;
+}
+
+.task-detail-card-completed {
+  padding: 16px;
+  background-color: #e8f5e9;
+}
+
+.task-detail-label {
+  color: #666;
+}
+
+.task-detail-value {
+  font-weight: 600;
+}
+
+.task-detail-title {
+  font-weight: 700;
+}
+
+.task-detail-chip {
+  font-weight: bold !important;
+  margin-top: 8px;
+}
+
+/* Close Button */
+.task-close-button {
+  background-color: #67BCE0 !important;
+  color: #000 !important;
+}
+
+.task-close-button:hover {
+  background-color: #5aa8cc !important;
+}
+
+/* Delete Info Box */
+.task-delete-info-box {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: #ffebee;
+  border-radius: 8px;
+}
+
+.task-delete-info-name {
+  font-weight: 600;
+}
+
+.task-delete-info-id {
+  color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .task-main-container {
+    padding: 16px;
+  }
+  
+  .task-page-title {
+    font-size: 1.75rem;
+    margin-bottom: 16px;
+  }
+  
+  .task-filter-section {
+    margin-bottom: 16px;
+  }
+  
+  .task-form-container {
+    padding: 16px;
+    border-width: 3px;
+  }
+  
+  .task-table-container {
+    overflow-x: auto;
+  }
+}
+
+/* Animation for loading spinner */
+@keyframes task-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Smooth transitions */
+.task-table-row,
+.task-add-button,
+.task-close-button {
+  transition: all 0.3s ease;
+}

@@ -1,53 +1,405 @@
-/* Unique calendar styles for Dashboard only */
-.dashboard-calendar {
-  background-color: #ffffff;
-  border-radius: 16px;
-  padding: 16px;
-  font-family: Arial, sans-serif;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+/* Employee Dashboard - Unique Scoped Styles */
+
+/* Employee Dashboard Calendar Styles */
+.employee-dashboard-calendar {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+  border-radius: 20px;
+  padding: 14px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  box-shadow: 0px 8px 24px rgba(103, 188, 224, 0.15);
   max-width: 100%;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid rgba(103, 188, 224, 0.2);
 }
 
-.dashboard-calendar:hover {
-  transform: translateY(-2px);
-  box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.12);
+.employee-dashboard-calendar:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0px 12px 32px rgba(103, 188, 224, 0.3);
+  border-color: rgba(103, 188, 224, 0.4);
 }
 
-.dashboard-calendar .react-calendar__navigation {
-  background-color: #67BCE0;
-  border-radius: 12px;
-  margin-bottom: 12px;
-  padding: 4px;
+.employee-dashboard-calendar .react-calendar__navigation {
+  background: linear-gradient(135deg, #67BCE0 0%, #78d1ec 100%);
+  border-radius: 14px;
+  margin-bottom: 16px;
+  padding: 8px;
+  box-shadow: 0px 4px 12px rgba(103, 188, 224, 0.3);
 }
 
-.dashboard-calendar .react-calendar__navigation button {
+.employee-dashboard-calendar .react-calendar__navigation button {
   color: white;
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 15px;
+  transition: all 0.2s ease;
+  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.employee-dashboard-calendar .react-calendar__navigation button:enabled:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  transform: scale(1.05);
+}
+
+.employee-dashboard-calendar .react-calendar__navigation button:disabled {
+  opacity: 0.4;
+}
+
+.employee-dashboard-calendar .react-calendar__month-view__weekdays {
+  text-transform: uppercase;
+  font-size: 11px;
+  font-weight: 800;
+  color: #67BCE0;
+  letter-spacing: 1px;
+  padding: 8px 0;
+}
+
+.employee-dashboard-calendar .react-calendar__tile {
+  padding: 12px;
+  border-radius: 10px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 14px;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
 }
 
-.dashboard-calendar .react-calendar__tile {
-  padding: 10px;
-  border-radius: 8px;
-  transition: background 0.2s ease;
+.employee-dashboard-calendar .react-calendar__tile::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, rgba(103, 188, 224, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
 }
 
-.dashboard-calendar .react-calendar__tile--active {
-  background: linear-gradient(135deg, #6659e8, #5145cd) !important;
+.employee-dashboard-calendar .react-calendar__tile:hover::before {
+  opacity: 1;
+}
+
+.employee-dashboard-calendar .react-calendar__tile abbr {
+  position: relative;
+  z-index: 1;
+}
+
+.employee-dashboard-calendar .react-calendar__tile--active {
+  background: linear-gradient(135deg, #6659e8 0%, #5145cd 100%) !important;
   color: white !important;
-  font-weight: bold;
+  font-weight: 800;
+  box-shadow: 0px 6px 16px rgba(102, 89, 232, 0.4);
+  transform: scale(1.05);
 }
 
-.dashboard-calendar .react-calendar__tile--now {
-  border: 2px solid #67BCE0;
-  border-radius: 8px;
+.employee-dashboard-calendar .react-calendar__tile--now {
+  background: linear-gradient(135deg, #67BCE0 0%, #78d1ec 100%);
+  color: white;
+  border: none;
+  font-weight: 800;
+  box-shadow: 0px 4px 12px rgba(103, 188, 224, 0.3);
+  animation: employee-pulse 2s infinite;
 }
 
-.dashboard-calendar .react-calendar__month-view__days__day--weekend {
+@keyframes employee-pulse {
+  0%, 100% {
+    box-shadow: 0px 4px 12px rgba(103, 188, 224, 0.3);
+  }
+  50% {
+    box-shadow: 0px 6px 20px rgba(103, 188, 224, 0.5);
+  }
+}
+
+.employee-dashboard-calendar .react-calendar__month-view__days__day--weekend {
   color: #e63946;
+  font-weight: 700;
 }
 
-.dashboard-calendar .react-calendar__tile:hover {
-  background: #f0f4ff;
+.employee-dashboard-calendar .react-calendar__tile:enabled:hover {
+  background: linear-gradient(135deg, #f0f4ff 0%, #e6f7ff 100%);
+  transform: scale(1.08);
+  box-shadow: 0px 4px 12px rgba(103, 188, 224, 0.2);
+}
+
+.employee-dashboard-calendar .react-calendar__tile:enabled:focus {
+  background: #67BCE0;
+  color: white;
+  box-shadow: 0 0 0 3px rgba(103, 188, 224, 0.3);
+}
+
+/* Enhanced Card Styles - Scoped to Employee Dashboard */
+.employee-dashboard-container .MuiCard-root {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px !important;
+  overflow: hidden;
+  position: relative;
+}
+
+.employee-dashboard-container .MuiCard-root::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #6659e8, #67BCE0, #78d1ec, #6659e8);
+  background-size: 300% 100%;
+  animation: employee-shimmer 4s infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+@keyframes employee-shimmer {
+  0% {
+    background-position: -300% 0;
+  }
+  100% {
+    background-position: 300% 0;
+  }
+}
+
+.employee-dashboard-container .MuiCard-root:hover::before {
+  opacity: 1;
+}
+
+.employee-dashboard-container .MuiCard-root:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Stats Card Animations - Employee Dashboard */
+.employee-dashboard-grid .MuiGrid-item .MuiCard-root {
+  animation: employee-fadeInUp 0.6s ease-out backwards;
+}
+
+.employee-dashboard-grid .MuiGrid-item:nth-child(1) .MuiCard-root {
+  animation-delay: 0.1s;
+}
+
+.employee-dashboard-grid .MuiGrid-item:nth-child(2) .MuiCard-root {
+  animation-delay: 0.2s;
+}
+
+.employee-dashboard-grid .MuiGrid-item:nth-child(3) .MuiCard-root {
+  animation-delay: 0.3s;
+}
+
+@keyframes employee-fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced Button Styles - Employee Dashboard */
+.employee-dashboard-container .MuiButton-root {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+  overflow: hidden;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  text-transform: none !important;
+}
+
+.employee-dashboard-container .MuiButton-root::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.employee-dashboard-container .MuiButton-root:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.employee-dashboard-container .MuiButton-root:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.25) !important;
+}
+
+.employee-dashboard-container .MuiButton-root:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+/* Performance Score Animation - Employee Dashboard */
+.employee-dashboard-container .MuiTypography-h2 {
+  animation: employee-scoreReveal 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: linear-gradient(135deg, #6659e8 0%, #67BCE0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes employee-scoreReveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-10deg);
+  }
+  60% {
+    transform: scale(1.1) rotate(2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* Chip Enhancements - Employee Dashboard */
+.employee-dashboard-container .MuiChip-root {
+  font-weight: 700 !important;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease !important;
+}
+
+.employee-dashboard-container .MuiChip-root:hover {
+  transform: scale(1.05);
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Chart Container Enhancements - Employee Dashboard */
+.employee-dashboard-container .recharts-wrapper {
+  filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.05));
+}
+
+.employee-dashboard-container .recharts-pie-sector {
+  transition: all 0.3s ease;
+  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.employee-dashboard-container .recharts-pie-sector:hover {
+  filter: drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+/* Loading Spinner Enhancement - Employee Dashboard */
+.employee-dashboard-container .MuiCircularProgress-root {
+  filter: drop-shadow(0px 4px 12px rgba(103, 188, 224, 0.4));
+}
+
+/* Alert Box Styling - Employee Dashboard */
+.employee-dashboard-container .MuiAlert-root {
+  border-radius: 16px !important;
+  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1) !important;
+  border-left: 4px solid currentColor !important;
+  animation: employee-slideIn 0.3s ease-out;
+}
+
+@keyframes employee-slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Progress Bar Animation - Employee Dashboard */
+@keyframes employee-fillProgress {
+  from {
+    width: 0%;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .employee-dashboard-calendar {
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .employee-dashboard-calendar .react-calendar__tile {
+    padding: 8px;
+    font-size: 12px;
+  }
+
+  .employee-dashboard-calendar .react-calendar__navigation button {
+    font-size: 13px;
+  }
+  
+  .employee-dashboard-container .MuiCard-root:hover {
+    transform: translateY(-4px) scale(1.01);
+  }
+
+  .employee-dashboard-container .MuiTypography-h2 {
+    font-size: 3rem !important;
+  }
+}
+
+/* Scrollbar Styling - Employee Dashboard */
+.employee-dashboard-container *::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.employee-dashboard-container *::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.employee-dashboard-container *::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #67BCE0 0%, #78d1ec 100%);
+  border-radius: 10px;
+  transition: background 0.3s ease;
+}
+
+.employee-dashboard-container *::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5aadce 0%, #69c5e8 100%);
+}
+
+/* Status Indicator Pulse Animation - Employee Dashboard */
+@keyframes employee-statusPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.2);
+  }
+}
+
+.employee-dashboard-container .MuiBox-root[style*="animation: pulse"] {
+  animation: employee-statusPulse 2s ease-in-out infinite !important;
+}
+
+/* Task Item Hover Effects - Employee Dashboard */
+.employee-dashboard-container .MuiBox-root[style*="bgcolor"][style*="transition"] {
+  cursor: pointer;
+}
+
+/* Performance Card Gradient Text */
+.employee-dashboard-container [class*="MuiCardContent"] h2 {
+  position: relative;
+}
+
+/* Server Status Badge - Employee Dashboard */
+.employee-dashboard-container .MuiBox-root[style*="borderRadius: \"20px\""] {
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Attendance Status Chip Glow - Employee Dashboard */
+.employee-dashboard-container .MuiChip-colorSuccess {
+  box-shadow: 0 0 20px rgba(23, 242, 85, 0.3);
+}
+
+.employee-dashboard-container .MuiChip-colorWarning {
+  box-shadow: 0 0 20px rgba(255, 165, 0, 0.3);
+}
+
+.employee-dashboard-container .MuiChip-colorError {
+  box-shadow: 0 0 20px rgba(230, 57, 70, 0.3);
 }
