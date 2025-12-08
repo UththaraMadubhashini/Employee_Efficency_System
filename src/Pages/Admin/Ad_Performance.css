@@ -1,0 +1,566 @@
+/* ==================== PERFORMANCE DASHBOARD STYLES ==================== */
+
+/* Main Container */
+.perf-dashboard-container {
+  padding: 32px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+/* Dashboard Title */
+.perf-dashboard-title {
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #1f2a65;
+  font-size: 2rem;
+}
+
+/* Alert Styles */
+.perf-alert {
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ==================== STATISTICS CARDS ==================== */
+
+.perf-stats-container {
+  margin-bottom: 32px;
+}
+
+.perf-stat-card {
+  height: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.perf-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.perf-stat-label {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.perf-stat-value {
+  font-weight: 700;
+  color: #1f2937;
+  margin: 12px 0;
+}
+
+/* ==================== TABS ==================== */
+
+.perf-tabs {
+  margin-bottom: 24px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 8px;
+}
+
+.perf-tab {
+  font-weight: 600;
+  font-size: 1rem;
+  text-transform: none;
+  min-height: 48px;
+}
+
+.perf-tab-content {
+  animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== FILTERS ==================== */
+
+.perf-filter-container {
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+/* ==================== BUTTONS ==================== */
+
+.perf-new-feedback-btn {
+  background-color: #74C0E3;
+  border-radius: 30px;
+  border: 2px solid #000;
+  color: #000;
+  font-weight: bold;
+  padding: 8px 32px;
+  text-transform: none;
+  transition: all 0.3s ease;
+}
+
+.perf-new-feedback-btn:hover {
+  background-color: #5aa8cc;
+  transform: scale(1.05);
+}
+
+.perf-refresh-btn {
+  background-color: #4CAF50;
+  color: #fff;
+  font-weight: bold;
+  text-transform: none;
+  transition: all 0.3s ease;
+}
+
+.perf-refresh-btn:hover {
+  background-color: #45a049;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.perf-view-btn {
+  border-radius: 20px;
+  text-transform: none;
+  transition: all 0.3s ease;
+}
+
+.perf-view-btn:hover {
+  background-color: #f0f0f0;
+  transform: scale(1.05);
+}
+
+.perf-submit-btn {
+  background-color: #4CAF50;
+  border-radius: 60px;
+  padding: 8px 32px;
+  text-transform: none;
+  transition: all 0.3s ease;
+}
+
+.perf-submit-btn:hover {
+  background-color: #45a049;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+.perf-cancel-btn {
+  border-radius: 60px;
+  padding: 8px 32px;
+  text-transform: none;
+  transition: all 0.3s ease;
+}
+
+.perf-cancel-btn:hover {
+  background-color: #f5f5f5;
+}
+
+.perf-close-btn {
+  background-color: #67BCE0;
+  border-radius: 60px;
+  padding: 8px 32px;
+  text-transform: none;
+  transition: all 0.3s ease;
+}
+
+.perf-close-btn:hover {
+  background-color: #5aa8cc;
+  box-shadow: 0 4px 12px rgba(103, 188, 224, 0.4);
+}
+
+/* ==================== TABLES ==================== */
+
+.perf-table-container {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 16px;
+}
+
+.perf-table-header {
+  background-color: #B9B9F2;
+}
+
+.perf-table-header .MuiTableCell-root {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.perf-table-row {
+  transition: background-color 0.2s ease;
+}
+
+.perf-table-row:hover {
+  background-color: #f9fafb;
+}
+
+/* ==================== CHIPS ==================== */
+
+.perf-engagement-chip {
+  font-weight: 600;
+}
+
+.perf-engagement-chip.perf-engagement-high {
+  background-color: #4CAF50;
+  color: #fff;
+}
+
+.perf-engagement-chip.perf-engagement-medium {
+  background-color: #2196F3;
+  color: #fff;
+}
+
+.perf-engagement-chip.perf-engagement-low {
+  background-color: #FF9800;
+  color: #fff;
+}
+
+.perf-grade-chip {
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+/* ==================== PROGRESS BAR ==================== */
+
+.perf-progress-bar {
+  margin-top: 4px;
+  height: 6px;
+  border-radius: 3px;
+  background-color: #e0e0e0;
+}
+
+/* ==================== LOADING ==================== */
+
+.perf-loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 64px 0;
+}
+
+/* ==================== NO DATA ==================== */
+
+.perf-no-data {
+  color: #6b7280;
+  padding: 48px 0;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.perf-no-data-paper {
+  padding: 48px;
+  text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ==================== CHARTS ==================== */
+
+.perf-charts-container {
+  margin-bottom: 24px;
+}
+
+.perf-chart-paper {
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background-color: #ffffff;
+}
+
+.perf-chart-title {
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #1f2a65;
+}
+
+.perf-custom-tooltip {
+  padding: 12px;
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ==================== DEPARTMENT CARDS ==================== */
+
+.perf-dept-cards-container {
+  margin-bottom: 32px;
+}
+
+.perf-dept-card {
+  height: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.perf-dept-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.perf-dept-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1f2a65;
+}
+
+.perf-dept-subtitle {
+  color: #6b7280;
+  margin-bottom: 16px;
+}
+
+.perf-dept-score-box {
+  margin-bottom: 16px;
+}
+
+.perf-dept-score {
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.perf-dept-metrics {
+  margin-bottom: 8px;
+}
+
+/* ==================== DIALOGS ==================== */
+
+.perf-dialog-title {
+  background-color: #f5f9ff;
+  color: #1f2a65;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.5rem;
+  padding: 20px;
+}
+
+.perf-details-dialog-title {
+  background-color: #f5f9ff;
+  font-weight: 700;
+  font-size: 1.5rem;
+  padding: 20px;
+}
+
+.perf-dialog-content {
+  padding: 24px;
+  margin-top: 8px;
+}
+
+.perf-dialog-inner {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  background-color: #fff;
+  border: 3px solid #74C0E3;
+  border-radius: 15px;
+}
+
+.perf-dialog-actions {
+  justify-content: center;
+  padding: 16px;
+}
+
+/* ==================== PERFORMANCE DETAILS ==================== */
+
+.perf-employee-info-paper {
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.perf-metric-card {
+  text-align: center;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+
+.perf-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.perf-breakdown-paper {
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+
+@media (max-width: 960px) {
+  .perf-dashboard-container {
+    padding: 16px;
+  }
+
+  .perf-dashboard-title {
+    font-size: 1.5rem;
+  }
+
+  .perf-stat-value {
+    font-size: 2rem;
+  }
+
+  .perf-chart-paper {
+    padding: 16px;
+  }
+
+  .perf-dialog-inner {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .perf-dashboard-container {
+    padding: 12px;
+  }
+
+  .perf-dashboard-title {
+    font-size: 1.25rem;
+    margin-bottom: 16px;
+  }
+
+  .perf-stats-container {
+    margin-bottom: 16px;
+  }
+
+  .perf-stat-value {
+    font-size: 1.75rem;
+  }
+
+  .perf-filter-container {
+    margin-bottom: 16px;
+  }
+
+  .perf-new-feedback-btn {
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .perf-chart-paper {
+    padding: 12px;
+  }
+
+  .perf-dept-card {
+    margin-bottom: 16px;
+  }
+
+  .perf-dialog-content {
+    padding: 16px;
+  }
+
+  .perf-dialog-inner {
+    padding: 12px;
+    border-width: 2px;
+  }
+}
+
+/* ==================== ANIMATIONS ==================== */
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.perf-stat-card,
+.perf-dept-card,
+.perf-chart-paper {
+  animation: slideUp 0.5s ease-out;
+}
+
+/* ==================== CUSTOM SCROLLBAR ==================== */
+
+.perf-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.perf-table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.perf-table-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.perf-table-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* ==================== PRINT STYLES ==================== */
+
+@media print {
+  .perf-filter-container,
+  .perf-new-feedback-btn,
+  .perf-refresh-btn,
+  .perf-view-btn,
+  .perf-tabs {
+    display: none;
+  }
+
+  .perf-dashboard-container {
+    padding: 0;
+  }
+
+  .perf-stat-card,
+  .perf-dept-card,
+  .perf-chart-paper {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+}
+
+/* ==================== ACCESSIBILITY ==================== */
+
+.perf-view-btn:focus,
+.perf-new-feedback-btn:focus,
+.perf-refresh-btn:focus,
+.perf-submit-btn:focus,
+.perf-cancel-btn:focus,
+.perf-close-btn:focus {
+  outline: 3px solid #2196F3;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .perf-stat-card,
+  .perf-dept-card,
+  .perf-chart-paper {
+    border: 2px solid #000;
+  }
+
+  .perf-table-header {
+    border-bottom: 3px solid #000;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .perf-stat-card,
+  .perf-dept-card,
+  .perf-tab-content,
+  .perf-metric-card {
+    animation: none;
+    transition: none;
+  }
+
+  .perf-stat-card:hover,
+  .perf-dept-card:hover {
+    transform: none;
+  }
+}

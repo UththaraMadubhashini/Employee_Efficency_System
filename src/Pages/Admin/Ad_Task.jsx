@@ -20,18 +20,20 @@ import {
   TablePagination,
   Select,
   Grid,
+  FormControl,
+  InputLabel,
+  Paper,
+  Chip,
+  CircularProgress,
 } from "@mui/material";
-import { Edit, Delete } from "@mui/icons-material";
-import { rtdb } from "../../firebase/firebase";
-import { ref, set, update, remove, onValue } from "firebase/database";
+import { Edit, Delete, Add, Visibility } from "@mui/icons-material";
+
+const API_BASE_URL = "http://127.0.0.1:5001";
 
 const labelWithAsterisk = (label) => (
   <Box component="span">
     {label}
-    <Box component="span" sx={{ color: "red" }}>
-      {" "}
-      *{" "}
-    </Box>
+    <Box component="span" style={{ color: 'red', marginLeft: '4px' }}>*</Box>
   </Box>
 );
 
@@ -43,6 +45,7 @@ function ConfirmDialog({
   confirmColor = "primary",
   onCancel,
   onConfirm,
+  loading = false,
 }) {
   return (
     <Dialog open={open} onClose={onCancel} fullWidth maxWidth="xs">
@@ -51,9 +54,16 @@ function ConfirmDialog({
         <Typography>{message}</Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onCancel}>Cancel</Button>
-        <Button variant="contained" color={confirmColor} onClick={onConfirm}>
-          Confirm
+        <Button onClick={onCancel} disabled={loading}>
+          Cancel
+        </Button>
+        <Button 
+          variant="contained" 
+          color={confirmColor} 
+          onClick={onConfirm}
+          disabled={loading}
+        >
+          {loading ? <CircularProgress size={24} /> : 'Confirm'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -69,64 +79,50 @@ function FormFields({
   readOnly = false,
 }) {
   return (
-    <Box
-      sx={{
-        boxShadow: 3,
-        p: 3,
-        backgroundColor: "#ffffff",
-        border: "5px solid #67BCE0",
-        borderRadius: "20px",
-      }}
-    >
+    <Box sx={{ mt: 2 }}>
       <Grid container spacing={2}>
         {/* Task ID */}
         <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
             label="Task ID"
-            name="taskId"
-            value={formData.taskId}
+            name="task_id"
+            value={formData.task_id}
             InputProps={{ readOnly: true }}
           />
         </Grid>
 
-        {/* Employee ID */}
+        {/* Employee Selection */}
         <Grid item xs={12} sm={6}>
-          <Select
-            fullWidth
-            name="employeeId"
-            value={formData.employeeId}
-            onChange={handleEmployeeSelect}
-            displayEmpty
-          >
-            <MenuItem value="">Select Employee</MenuItem>
-            {employees.map((emp) => (
-              <MenuItem key={emp.employeeId} value={emp.employeeId}>
-                {emp.employeeId} - {emp.fullName}
-              </MenuItem>
-            ))}
-          </Select>
+          <FormControl fullWidth required>
+            <InputLabel>{labelWithAsterisk("Employee")}</InputLabel>
+            <Select
+              name="emp_id"
+              value={formData.emp_id}
+              onChange={handleEmployeeSelect}
+              label="Employee"
+              disabled={readOnly}
+            >
+              <MenuItem value="">Select Employee</MenuItem>
+              {employees.map((emp) => (
+                <MenuItem key={emp.emp_id} value={emp.emp_id}>
+                  {emp.emp_id} - {emp.fullName}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Grid>
 
-        {/* Employee Name */}
-        <Grid item xs={12} sm={6}>
+        {/* Task Name */}
+        <Grid item xs={12}>
           <TextField
             fullWidth
-            label="Employee Name"
-            name="employeeName"
-            value={formData.employeeName}
-            InputProps={{ readOnly: true }}
-          />
-        </Grid>
-
-        {/* Department */}
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Department"
-            name="department"
-            value={formData.department}
-            InputProps={{ readOnly: true }}
+            required
+            label={labelWithAsterisk("Task Name")}
+            name="task_name"
+            value={formData.task_name}
+            onChange={handleChange}
+            InputProps={{ readOnly }}
           />
         </Grid>
 
@@ -134,9 +130,10 @@ function FormFields({
         <Grid item xs={12}>
           <TextField
             fullWidth
+            required
             multiline
-            rows={2}
-            label="Description"
+            rows={3}
+            label={labelWithAsterisk("Description")}
             name="description"
             value={formData.description}
             onChange={handleChange}
@@ -144,29 +141,69 @@ function FormFields({
           />
         </Grid>
 
+        {/* Priority */}
+        <Grid item xs={12} sm={6}>
+          <FormControl fullWidth required>
+            <InputLabel>{labelWithAsterisk("Priority")}</InputLabel>
+            <Select
+              name="priority"
+              value={formData.priority}
+              onChange={handleChange}
+              label="Priority"
+              disabled={readOnly}
+            >
+              <MenuItem value="Low">Low</MenuItem>
+              <MenuItem value="Medium">Medium</MenuItem>
+              <MenuItem value="High">High</MenuItem>
+              <MenuItem value="Critical">Critical</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
+        {/* Status */}
+        <Grid item xs={12} sm={6}>
+          <FormControl fullWidth>
+            <InputLabel>Status</InputLabel>
+            <Select
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              label="Status"
+              disabled={readOnly}
+            >
+              <MenuItem value="Pending">Pending</MenuItem>
+              <MenuItem value="In Progress">In Progress</MenuItem>
+              <MenuItem value="Completed">Completed</MenuItem>
+              <MenuItem value="Overdue">Overdue</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+
         {/* Start Date */}
-        <Grid item xs={12}>
+        <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
+            required
             type="date"
-            name="startDate"
-            label="Start Date"
+            name="start_date"
+            label={labelWithAsterisk("Start Date")}
             InputLabelProps={{ shrink: true }}
-            value={formData.startDate}
+            value={formData.start_date}
             onChange={handleChange}
             InputProps={{ readOnly }}
           />
         </Grid>
 
-        {/* End Date */}
-        <Grid item xs={12}>
+        {/* Due Date */}
+        <Grid item xs={12} sm={6}>
           <TextField
             fullWidth
+            required
             type="date"
-            name="endDate"
-            label="End Date"
+            name="due_date"
+            label={labelWithAsterisk("Due Date")}
             InputLabelProps={{ shrink: true }}
-            value={formData.endDate}
+            value={formData.due_date}
             onChange={handleChange}
             InputProps={{ readOnly }}
           />
@@ -179,32 +216,34 @@ function FormFields({
 /* ---------------- Main Component ---------------- */
 export default function Ad_Task() {
   const [formData, setFormData] = useState({
-    taskId: "",
-    employeeId: "",
-    employeeName: "",
-    department: "",
+    task_id: "",
+    emp_id: "",
+    task_name: "",
     description: "",
-    startDate: "",
-    endDate: "",
+    status: "Pending",
+    priority: "Medium",
+    start_date: "",
+    due_date: "",
   });
 
   const [employees, setEmployees] = useState([]);
   const [taskList, setTaskList] = useState([]);
   const [page, setPage] = useState(0);
-  const rowsPerPage = 5;
+  const rowsPerPage = 10;
 
-  const [openAdd, setOpenAdd] = useState(false); // (unused but kept)
-  const [openEdit, setOpenEdit] = useState(false); // (unused but kept)
-  const [openDelete, setOpenDelete] = useState(false); // (unused but kept)
   const [selectedTask, setSelectedTask] = useState(null);
 
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openViewDialog, setOpenViewDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   const [openConfirmAdd, setOpenConfirmAdd] = useState(false);
   const [openConfirmEdit, setOpenConfirmEdit] = useState(false);
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+
+  const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const [snack, setSnack] = useState({
     open: false,
@@ -212,35 +251,90 @@ export default function Ad_Task() {
     severity: "success",
   });
 
-  // Minimal filter state to satisfy existing useMemo usage (UI not changed)
-  const [filterDept] = useState("");
-  const [filterEmp] = useState("");
+  const [filterDept, setFilterDept] = useState("");
+  const [filterEmp, setFilterEmp] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
 
-  /* Load Employees */
+  /* Load Employees from backend */
   useEffect(() => {
-    const employeesRef = ref(rtdb, "employees");
-    return onValue(employeesRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) setEmployees(Object.values(data));
-    });
+    fetchEmployees();
   }, []);
 
-  /* Load Tasks (newest first) */
+  /* Load Tasks from backend */
   useEffect(() => {
-    const tasksRef = ref(rtdb, "tasks");
-    return onValue(tasksRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const loaded = Object.values(data).sort((a, b) =>
-          b.taskId.localeCompare(a.taskId)
-        );
-        setTaskList(loaded);
-      } else {
-        setTaskList([]);
+    fetchTasks();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      console.log("Fetching employees from:", `${API_BASE_URL}/get_all_employees`);
+      
+      const response = await fetch(`${API_BASE_URL}/get_all_employees`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      setPage(0);
-    });
-  }, []);
+      
+      const data = await response.json();
+      console.log("Employees data:", data);
+      
+      if (data.success) {
+        setEmployees(data.employees || []);
+      } else {
+        throw new Error(data.error || "Failed to fetch employees");
+      }
+    } catch (err) {
+      console.error("Error fetching employees:", err);
+      setSnack({ 
+        open: true, 
+        message: `Failed to load employees: ${err.message}`, 
+        severity: "error" 
+      });
+      setEmployees([]);
+    }
+  };
+
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      console.log("Fetching tasks from:", `${API_BASE_URL}/get_tasks?role=admin`);
+      
+      const response = await fetch(`${API_BASE_URL}/get_tasks?role=admin`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("Tasks data:", data);
+      
+      if (data.success) {
+        setTaskList(data.tasks.sort((a, b) => b.task_id.localeCompare(a.task_id)));
+      } else {
+        throw new Error(data.error || "Failed to fetch tasks");
+      }
+    } catch (err) {
+      console.error("Error fetching tasks:", err);
+      setSnack({ 
+        open: true, 
+        message: `Failed to load tasks: ${err.message}`, 
+        severity: "error" 
+      });
+      setTaskList([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   /* Handle Change */
   const handleChange = (e) =>
@@ -249,93 +343,98 @@ export default function Ad_Task() {
   /* Auto-fill employee info */
   const handleEmployeeSelect = (e) => {
     const selectedId = e.target.value;
-    const emp = employees.find((emp) => emp.employeeId === selectedId);
-    if (emp) {
-      setFormData((prev) => ({
-        ...prev,
-        employeeId: emp.employeeId,
-        employeeName: emp.fullName,
-        department: emp.department,
-      }));
-    } else {
-      setFormData((prev) => ({ ...prev, employeeId: selectedId }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      emp_id: selectedId,
+    }));
   };
 
-  // Auto-generate TaskID when Add Dialog opens
-  useEffect(() => {
-    if (openAddDialog) {
-      setFormData((prev) => ({ ...prev, taskId: generateTaskId() }));
-    }
-  }, [openAddDialog, taskList]);
+  // Generate Task ID
+  const generateTaskId = () => {
+    const adminId = sessionStorage.getItem("emp_id") || localStorage.getItem("emp_id") || "ADMIN";
+    const timestamp = Date.now().toString().slice(-6);
+    return `TSK_${adminId}_${timestamp}`;
+  };
 
-  // Unique options for filters from current dataset (kept to match original code)
+  // Unique options for filters
   const departmentOptions = useMemo(
     () =>
       Array.from(
-        new Set(taskList.map((t) => t.department).filter(Boolean))
+        new Set(
+          taskList
+            .map(t => {
+              const emp = employees.find(e => e.emp_id === t.emp_id);
+              return emp?.department;
+            })
+            .filter(Boolean)
+        )
       ).sort(),
-    [taskList]
+    [taskList, employees]
   );
+
   const employeeIdOptions = useMemo(
     () =>
       Array.from(
-        new Set(taskList.map((t) => t.employeeId).filter(Boolean))
+        new Set(taskList.map((t) => t.emp_id).filter(Boolean))
       ).sort(),
     [taskList]
   );
 
-  // Apply filters (kept for compatibility)
+  // Apply filters
   const filtered = useMemo(() => {
     return taskList.filter((t) => {
-      const deptOk = filterDept ? t.department === filterDept : true;
-      const empOk = filterEmp ? t.employeeId === filterEmp : true;
-      return deptOk && empOk;
+      const emp = employees.find(e => e.emp_id === t.emp_id);
+      const deptOk = filterDept ? emp?.department === filterDept : true;
+      const empOk = filterEmp ? t.emp_id === filterEmp : true;
+      const statusOk = filterStatus ? t.status === filterStatus : true;
+      return deptOk && empOk && statusOk;
     });
-  }, [taskList, filterDept, filterEmp]);
+  }, [taskList, filterDept, filterEmp, filterStatus, employees]);
 
-  // Paginate (kept, even if not used in table below)
+  // Paginate
   const paged = useMemo(() => {
     const start = page * rowsPerPage;
     return filtered.slice(start, start + rowsPerPage);
   }, [filtered, page]);
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / rowsPerPage));
   const resetForm = () =>
     setFormData({
-      taskId: "",
-      employeeId: "",
-      employeeName: "",
-      department: "",
+      task_id: "",
+      emp_id: "",
+      task_name: "",
       description: "",
-      startDate: "",
-      endDate: "",
+      status: "Pending",
+      priority: "Medium",
+      start_date: "",
+      due_date: "",
     });
-
-  /* Generate Task ID */
-  const generateTaskId = () => {
-    if (taskList.length === 0) return "TSK001";
-    const lastId = taskList[0].taskId;
-    const number = parseInt(lastId.replace("TSK", ""), 10) + 1;
-    return `TSK${number.toString().padStart(3, "0")}`;
-  };
 
   /* Basic validation */
   const validateForm = () => {
-    if (!formData.employeeId) {
-      setSnack({ open: true, message: "Select an employee.", severity: "warning" });
+    console.log("Validating form data:", formData);
+    
+    if (!formData.emp_id || formData.emp_id === "") {
+      setSnack({ open: true, message: "Please select an employee.", severity: "warning" });
       return false;
     }
-    if (!formData.description) {
+    if (!formData.task_name || formData.task_name.trim() === "") {
+      setSnack({ open: true, message: "Task name is required.", severity: "warning" });
+      return false;
+    }
+    if (!formData.description || formData.description.trim() === "") {
       setSnack({ open: true, message: "Description is required.", severity: "warning" });
       return false;
     }
-    if (!formData.startDate || !formData.endDate) {
-      setSnack({ open: true, message: "Start and End dates are required.", severity: "warning" });
+    if (!formData.start_date) {
+      setSnack({ open: true, message: "Start date is required.", severity: "warning" });
       return false;
     }
-    if (new Date(formData.endDate) < new Date(formData.startDate)) {
-      setSnack({ open: true, message: "End date cannot be before start date.", severity: "warning" });
+    if (!formData.due_date) {
+      setSnack({ open: true, message: "Due date is required.", severity: "warning" });
+      return false;
+    }
+    if (new Date(formData.due_date) < new Date(formData.start_date)) {
+      setSnack({ open: true, message: "Due date cannot be before start date.", severity: "warning" });
       return false;
     }
     return true;
@@ -343,137 +442,408 @@ export default function Ad_Task() {
 
   /* Add Task */
   const handleAdd = () => {
-    setFormData({
-      taskId: generateTaskId(),
-      employeeId: "",
-      employeeName: "",
-      department: "",
-      description: "",
-      startDate: "",
-      endDate: "",
-    });
-    setOpenAdd(true); // kept as in original
-    setOpenAddDialog(true); // actually opens the dialog
+    resetForm();
+    const today = new Date().toISOString().split('T')[0];
+    setFormData((prev) => ({
+      ...prev,
+      task_id: generateTaskId(),
+      start_date: today,
+      due_date: today,
+    }));
+    setOpenAddDialog(true);
   };
 
   const confirmAdd = async () => {
-    if (!validateForm()) return;
-    const taskRef = ref(rtdb, `tasks/${formData.taskId}`);
-    await set(taskRef, formData);
-    setOpenConfirmAdd(false);
-    setOpenAddDialog(false);
-    setSnack({ open: true, message: "Task added successfully!", severity: "success" });
+    console.log("Confirm add called with formData:", formData);
+    
+    if (!validateForm()) {
+      console.log("Validation failed");
+      return;
+    }
+    
+    try {
+      setActionLoading(true);
+      const adminId = sessionStorage.getItem("emp_id") || localStorage.getItem("emp_id") || "ADMIN";
+      
+      const payload = {
+        task_id: formData.task_id,
+        emp_id: formData.emp_id,
+        task_name: formData.task_name.trim(),
+        description: formData.description.trim(),
+        status: formData.status || "Pending",
+        priority: formData.priority || "Medium",
+        start_date: formData.start_date,
+        due_date: formData.due_date,
+        assigned_by: adminId,
+      };
+      
+      console.log("Sending payload:", payload);
+      
+      const response = await fetch(`${API_BASE_URL}/create_task`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      console.log("Response status:", response.status);
+      
+      const responseText = await response.text();
+      console.log("Response text:", responseText);
+
+      if (!response.ok) {
+        let errorMessage = `HTTP ${response.status}`;
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          errorMessage = responseText || errorMessage;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const data = JSON.parse(responseText);
+      console.log("Response data:", data);
+
+      if (data.success) {
+        setSnack({ open: true, message: "Task created successfully!", severity: "success" });
+        setOpenConfirmAdd(false);
+        setOpenAddDialog(false);
+        fetchTasks();
+        resetForm();
+      } else {
+        setSnack({ open: true, message: data.error || "Failed to create task", severity: "error" });
+      }
+    } catch (err) {
+      console.error("Error creating task:", err);
+      setSnack({ open: true, message: `Failed to create task: ${err.message}`, severity: "error" });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  /* View Task Details */
+  const handleViewClick = (task) => {
+    setSelectedTask(task);
+    setOpenViewDialog(true);
   };
 
   /* Edit Task */
-  const handleEditClickOpen = (task) => {
-    setFormData(task);
+  const handleEditClick = (task) => {
+    setFormData({
+      task_id: task.task_id,
+      emp_id: task.emp_id,
+      task_name: task.task_name,
+      description: task.description || "",
+      status: task.status,
+      priority: task.priority,
+      start_date: task.start_date,
+      due_date: task.due_date,
+    });
     setSelectedTask(task);
     setOpenEditDialog(true);
   };
 
   const confirmEdit = async () => {
     if (!validateForm()) return;
-    if (selectedTask) {
-      const taskRef = ref(rtdb, `tasks/${formData.taskId}`);
-      await update(taskRef, formData);
-      setOpenConfirmEdit(false);
-      setOpenEditDialog(false);
-      setSnack({ open: true, message: "Task updated successfully!", severity: "info" });
+    
+    try {
+      setActionLoading(true);
+      const response = await fetch(`${API_BASE_URL}/update_task_status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          task_id: formData.task_id,
+          status: formData.status,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSnack({ open: true, message: "Task updated successfully!", severity: "info" });
+        setOpenConfirmEdit(false);
+        setOpenEditDialog(false);
+        fetchTasks();
+      } else {
+        setSnack({ open: true, message: data.error || "Failed to update task", severity: "error" });
+      }
+    } catch (err) {
+      setSnack({ open: true, message: `Failed to update task: ${err.message}`, severity: "error" });
+      console.error(err);
+    } finally {
+      setActionLoading(false);
     }
   };
 
   /* Delete Task */
-  const handleDeleteClickOpen = (task) => {
+  const handleDeleteClick = (task) => {
     setSelectedTask(task);
     setOpenDeleteDialog(true);
   };
 
   const confirmDelete = async () => {
-    if (selectedTask) {
-      const taskRef = ref(rtdb, `tasks/${selectedTask.taskId}`);
-      await remove(taskRef);
-      setOpenConfirmDelete(false);
-      setOpenDeleteDialog(false);
-      setSnack({ open: true, message: "Task deleted!", severity: "error" });
+    if (!selectedTask) return;
+    
+    try {
+      setActionLoading(true);
+      const response = await fetch(`${API_BASE_URL}/delete_task`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          task_id: selectedTask.task_id,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSnack({ open: true, message: "Task deleted successfully!", severity: "error" });
+        setOpenConfirmDelete(false);
+        setOpenDeleteDialog(false);
+        fetchTasks();
+      } else {
+        setSnack({ open: true, message: data.error || "Failed to delete task", severity: "error" });
+      }
+    } catch (err) {
+      setSnack({ open: true, message: `Failed to delete task: ${err.message}`, severity: "error" });
+      console.error(err);
+    } finally {
+      setActionLoading(false);
     }
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Completed': return '#4CAF50';
+      case 'In Progress': return '#2196F3';
+      case 'Overdue': return '#F44336';
+      case 'Pending': return '#FF9800';
+      default: return '#757575';
+    }
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'Critical': return '#D32F2F';
+      case 'High': return '#F57C00';
+      case 'Medium': return '#FBC02D';
+      case 'Low': return '#388E3C';
+      default: return '#757575';
+    }
+  };
+
+  const getEmployeeName = (empId) => {
+    const emp = employees.find(e => e.emp_id === empId);
+    return emp ? emp.fullName : empId;
+  };
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h5" gutterBottom>
+    <Box sx={{ p: 4, bgcolor: '#f5f7fa', minHeight: '100vh' }}>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: '#4445B4' }}>
         Task Management
       </Typography>
 
-      {/* Add Task Button */}
-      <Button variant="contained" sx={{ mb: 2 }} onClick={handleAdd}>
-        Add Task
-      </Button>
+      {/* Filters and Add Button */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={3}>
+          <FormControl fullWidth>
+            <InputLabel>Filter by Department</InputLabel>
+            <Select
+              value={filterDept}
+              onChange={(e) => setFilterDept(e.target.value)}
+              label="Filter by Department"
+            >
+              <MenuItem value="">All Departments</MenuItem>
+              {departmentOptions.map(dept => (
+                <MenuItem key={dept} value={dept}>{dept}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={3}>
+          <FormControl fullWidth>
+            <InputLabel>Filter by Employee</InputLabel>
+            <Select
+              value={filterEmp}
+              onChange={(e) => setFilterEmp(e.target.value)}
+              label="Filter by Employee"
+            >
+              <MenuItem value="">All Employees</MenuItem>
+              {employeeIdOptions.map(empId => (
+                <MenuItem key={empId} value={empId}>
+                  {empId} - {getEmployeeName(empId)}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={3}>
+          <FormControl fullWidth>
+            <InputLabel>Filter by Status</InputLabel>
+            <Select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              label="Filter by Status"
+            >
+              <MenuItem value="">All Status</MenuItem>
+              <MenuItem value="Pending">Pending</MenuItem>
+              <MenuItem value="In Progress">In Progress</MenuItem>
+              <MenuItem value="Completed">Completed</MenuItem>
+              <MenuItem value="Overdue">Overdue</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} sm={3}>
+          <Button 
+            variant="contained" 
+            fullWidth
+            startIcon={<Add />}
+            onClick={handleAdd}
+            sx={{ height: '56px', bgcolor: '#4445B4' }}
+          >
+            Add New Task
+          </Button>
+        </Grid>
+      </Grid>
 
-      {/* Table */}
-      <Table>
-        <TableHead sx={{ backgroundColor: "#A1A3DC" }}>
-          <TableRow>
-            <TableCell>Task ID</TableCell>
-            <TableCell>Employee ID</TableCell>
-            <TableCell>Employee Name</TableCell>
-            <TableCell>Department</TableCell>
-            <TableCell>Description</TableCell>
-            <TableCell>Start / End Date</TableCell>
-            <TableCell>Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {taskList
-            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            .map((task) => (
-              <TableRow key={task.taskId}>
-                <TableCell>{task.taskId}</TableCell>
-                <TableCell>{task.employeeId}</TableCell>
-                <TableCell>{task.employeeName}</TableCell>
-                <TableCell>{task.department}</TableCell>
-                <TableCell>{task.description}</TableCell>
-                <TableCell>
-                  {task.startDate} / {task.endDate}
-                </TableCell>
-                <TableCell>
-                  <IconButton
-                    color="secondary"
-                    onClick={() => handleEditClickOpen(task)}
-                  >
-                    <Edit />
-                  </IconButton>
-                  <IconButton
-                    color="error"
-                    onClick={() => handleDeleteClickOpen(task)}
-                  >
-                    <Delete />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-        </TableBody>
-      </Table>
+      {/* Loading State */}
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress size={60} />
+        </Box>
+      ) : (
+        <>
+          {/* Table */}
+          <Paper elevation={3} sx={{ borderRadius: 2, overflow: 'hidden' }}>
+            <Table>
+              <TableHead sx={{ bgcolor: '#4445B4' }}>
+                <TableRow>
+                  <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Task ID</TableCell>
+                  <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Employee</TableCell>
+                  <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Task Name</TableCell>
+                  <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Priority</TableCell>
+                  <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Status</TableCell>
+                  <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Due Date</TableCell>
+                  <TableCell sx={{ color: '#fff', fontWeight: 'bold' }}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paged.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">
+                      <Typography variant="body1" sx={{ py: 4 }}>
+                        No tasks found
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paged.map((task) => (
+                    <TableRow key={task.task_id} hover>
+                      <TableCell>{task.task_id}</TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {getEmployeeName(task.emp_id)}
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary">
+                          {task.emp_id}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {task.task_name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={task.priority}
+                          size="small"
+                          style={{
+                            backgroundColor: getPriorityColor(task.priority),
+                            color: '#fff',
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={task.status}
+                          size="small"
+                          style={{
+                            backgroundColor: getStatusColor(task.status),
+                            color: '#fff',
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Typography 
+                          variant="body2"
+                          color={task.status === 'Overdue' ? 'error' : 'inherit'}
+                        >
+                          {new Date(task.due_date).toLocaleDateString()}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleViewClick(task)}
+                          size="small"
+                        >
+                          <Visibility />
+                        </IconButton>
+                        <IconButton
+                          color="secondary"
+                          onClick={() => handleEditClick(task)}
+                          size="small"
+                        >
+                          <Edit />
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          onClick={() => handleDeleteClick(task)}
+                          size="small"
+                        >
+                          <Delete />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </Paper>
 
-      {/* Pagination */}
-      <TablePagination
-        component="div"
-        count={taskList.length}
-        page={page}
-        onPageChange={(e, newPage) => setPage(newPage)}
-        rowsPerPage={rowsPerPage}
-        rowsPerPageOptions={[rowsPerPage]}
-      />
+          {/* Pagination */}
+          <TablePagination
+            component="div"
+            count={filtered.length}
+            page={page}
+            onPageChange={(e, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            rowsPerPageOptions={[rowsPerPage]}
+          />
+        </>
+      )}
 
       {/* Add Dialog */}
       <Dialog
         open={openAddDialog}
         onClose={() => setOpenAddDialog(false)}
         fullWidth
-        maxWidth="sm"
+        maxWidth="md"
       >
-        <DialogTitle>Add a New Task</DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
+        <DialogTitle sx={{ bgcolor: '#4445B4', color: '#fff' }}>
+          Add New Task
+        </DialogTitle>
+        <DialogContent>
           <FormFields
             formData={formData}
             handleChange={handleChange}
@@ -482,8 +852,10 @@ export default function Ad_Task() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenConfirmAdd(true)}>Add</Button>
           <Button onClick={() => setOpenAddDialog(false)}>Cancel</Button>
+          <Button onClick={() => setOpenConfirmAdd(true)} variant="contained" color="primary">
+            Add Task
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -492,10 +864,12 @@ export default function Ad_Task() {
         open={openEditDialog}
         onClose={() => setOpenEditDialog(false)}
         fullWidth
-        maxWidth="sm"
+        maxWidth="md"
       >
-        <DialogTitle>Edit Task</DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
+        <DialogTitle sx={{ bgcolor: '#4445B4', color: '#fff' }}>
+          Edit Task
+        </DialogTitle>
+        <DialogContent>
           <FormFields
             formData={formData}
             handleChange={handleChange}
@@ -504,58 +878,182 @@ export default function Ad_Task() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenConfirmEdit(true)}>Save</Button>
           <Button onClick={() => setOpenEditDialog(false)}>Cancel</Button>
+          <Button onClick={() => setOpenConfirmEdit(true)} variant="contained" color="secondary">
+            Save Changes
+          </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Delete Dialog */}
+      {/* View Dialog */}
+      <Dialog
+        open={openViewDialog}
+        onClose={() => setOpenViewDialog(false)}
+        fullWidth
+        maxWidth="md"
+      >
+        <DialogTitle sx={{ bgcolor: '#4445B4', color: '#fff' }}>
+          Task Details
+        </DialogTitle>
+        <DialogContent sx={{ pt: 3 }}>
+          {selectedTask && (
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <Paper elevation={2} sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" color="textSecondary">Task ID</Typography>
+                  <Typography variant="body1" fontWeight="bold">{selectedTask.task_id}</Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Paper elevation={2} sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" color="textSecondary">Employee</Typography>
+                  <Typography variant="body1">{getEmployeeName(selectedTask.emp_id)}</Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={12}>
+                <Paper elevation={2} sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" color="textSecondary">Task Name</Typography>
+                  <Typography variant="h6">{selectedTask.task_name}</Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={12}>
+                <Paper elevation={2} sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" color="textSecondary">Description</Typography>
+                  <Typography variant="body1">{selectedTask.description || 'No description'}</Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={6}>
+                <Paper elevation={2} sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" color="textSecondary">Priority</Typography>
+                  <Chip
+                    label={selectedTask.priority}
+                    style={{
+                      backgroundColor: getPriorityColor(selectedTask.priority),
+                      color: '#fff',
+                      marginTop: '8px',
+                    }}
+                  />
+                </Paper>
+              </Grid>
+              <Grid item xs={6}>
+                <Paper elevation={2} sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" color="textSecondary">Status</Typography>
+                  <Chip
+                    label={selectedTask.status}
+                    style={{
+                      backgroundColor: getStatusColor(selectedTask.status),
+                      color: '#fff',
+                      marginTop: '8px',
+                    }}
+                  />
+                </Paper>
+              </Grid>
+              <Grid item xs={6}>
+                <Paper elevation={2} sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" color="textSecondary">Start Date</Typography>
+                  <Typography variant="body1">
+                    {new Date(selectedTask.start_date).toLocaleDateString()}
+                  </Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={6}>
+                <Paper elevation={2} sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" color="textSecondary">Due Date</Typography>
+                  <Typography 
+                    variant="body1" 
+                    color={selectedTask.status === 'Overdue' ? 'error' : 'inherit'}
+                  >
+                    {new Date(selectedTask.due_date).toLocaleDateString()}
+                  </Typography>
+                </Paper>
+              </Grid>
+              {selectedTask.completion_date && (
+                <Grid item xs={12}>
+                  <Paper elevation={2} sx={{ p: 2, bgcolor: '#e8f5e9' }}>
+                    <Typography variant="subtitle2" color="textSecondary">Completion Date</Typography>
+                    <Typography variant="body1">
+                      {new Date(selectedTask.completion_date).toLocaleDateString()}
+                    </Typography>
+                  </Paper>
+                </Grid>
+              )}
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setOpenViewDialog(false)}
+            variant="contained"
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
       <Dialog
         open={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
         fullWidth
         maxWidth="xs"
       >
-        <DialogTitle>Delete Task</DialogTitle>
+        <DialogTitle sx={{ color: '#f44336' }}>
+          Delete Task
+        </DialogTitle>
         <DialogContent>
-          <Typography>Are you sure you want to delete this task?</Typography>
+          <Typography>
+            Are you sure you want to delete this task?
+          </Typography>
+          {selectedTask && (
+            <Box sx={{ mt: 2, p: 2, bgcolor: '#ffebee', borderRadius: 1 }}>
+              <Typography variant="body2" fontWeight="bold">
+                Task: {selectedTask.task_name}
+              </Typography>
+              <Typography variant="caption" color="textSecondary">
+                ID: {selectedTask.task_id}
+              </Typography>
+            </Box>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
+          <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+          <Button onClick={() => setOpenConfirmDelete(true)} color="error" variant="contained">
             Yes, Delete
           </Button>
-          <Button onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
         </DialogActions>
       </Dialog>
 
       {/* Confirm Dialogs */}
       <ConfirmDialog
         open={openConfirmAdd}
-        title="Confirm Add"
-        message="Are you sure you want to add this task?"
+        title="Confirm Add Task"
+        message="Are you sure you want to create this task?"
         onCancel={() => setOpenConfirmAdd(false)}
         onConfirm={confirmAdd}
+        loading={actionLoading}
       />
       <ConfirmDialog
         open={openConfirmEdit}
-        title="Confirm Save"
+        title="Confirm Save Changes"
         message="Save changes to this task?"
         onCancel={() => setOpenConfirmEdit(false)}
         onConfirm={confirmEdit}
+        loading={actionLoading}
       />
       <ConfirmDialog
         open={openConfirmDelete}
         title="Confirm Delete"
-        message="This action cannot be undone. Delete task?"
+        message="This action cannot be undone. Delete task permanently?"
         confirmColor="error"
         onCancel={() => setOpenConfirmDelete(false)}
         onConfirm={confirmDelete}
+        loading={actionLoading}
       />
 
       {/* Snackbar */}
       <Snackbar
         open={snack.open}
-        autoHideDuration={3000}
+        autoHideDuration={4000}
         onClose={() => setSnack((s) => ({ ...s, open: false }))}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >

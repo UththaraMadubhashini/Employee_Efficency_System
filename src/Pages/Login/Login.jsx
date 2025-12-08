@@ -12,38 +12,41 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    try {
-      const res = await fetch("http://localhost:5001/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim(), password: password.trim() }),
-      });
+  try {
+    const res = await fetch("http://127.0.0.1:5001/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim(), password: password.trim() }),
+    });
 
-      const data = await res.json();
-      console.log(data);
-      
+    const data = await res.json();
+    console.log("Login response:", data);
 
-      if (!res.ok) throw new Error(data.message || "Login failed");
+    if (!res.ok) throw new Error(data.error || "Login failed");
 
-      // Save JWT token in localStorage
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
+    // Store all necessary data in localStorage
+    localStorage.setItem("role", data.role);
+    localStorage.setItem("emp_id", data.emp_id);  
+    localStorage.setItem("name", data.name);   
+    localStorage.setItem("email", data.email);   
 
-      // Navigate based on role
-      if (data.role.toLowerCase() === "admin") {
-        navigate("/admin");
-      }else navigate("/employee");
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "❌ Invalid email or password");
+    // Navigate based on role
+    if (data.role.toLowerCase() === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/employee");
     }
+  } catch (err) {
+    console.error(err);
+    setError(err.message || "Invalid email or password");
+  }
 
-    setLoading(false);
-  };
+  setLoading(false);
+};
 
   return (
     <div className="login-container">

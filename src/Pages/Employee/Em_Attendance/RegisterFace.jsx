@@ -47,7 +47,6 @@ export default function EmployeeRegistration() {
     setIsProcessing(true);
 
     try {
-      // FIXED: Changed endpoint from /register_employee to /register_face
       const response = await axios.post(`${API_URL}/register_face`, {
         emp_id: formData.emp_id,
         image: capturedImage,
@@ -107,7 +106,6 @@ export default function EmployeeRegistration() {
             fullWidth
             required
             variant="outlined"
-            helperText="Enter your existing employee ID from Firebase"
             sx={{
               "& .MuiOutlinedInput-root": {
                 "&:hover fieldset": {
@@ -127,7 +125,7 @@ export default function EmployeeRegistration() {
             onChange={handleInputChange}
             fullWidth
             variant="outlined"
-            helperText="Optional - for display purposes only"
+            
             sx={{
               "& .MuiOutlinedInput-root": {
                 "&:hover fieldset": {
@@ -148,7 +146,6 @@ export default function EmployeeRegistration() {
             onChange={handleInputChange}
             fullWidth
             variant="outlined"
-            helperText="Optional - for display purposes only"
             sx={{
               "& .MuiOutlinedInput-root": {
                 "&:hover fieldset": {

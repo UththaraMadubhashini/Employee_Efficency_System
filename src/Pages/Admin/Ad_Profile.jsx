@@ -39,7 +39,7 @@ export default function Ad_Profile() {
   const [admins, setAdmins] = useState([]);
   const [departmentFilter, setDepartmentFilter] = useState("");
   const [empIdFilter, setEmpIdFilter] = useState("");
-  const [tableType, setTableType] = useState("Employee"); // <-- Added
+  const [tableType, setTableType] = useState("Employee");
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
@@ -47,7 +47,7 @@ export default function Ad_Profile() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const departments = ["HR", "Food & Beverages", "IT", "FrontDesk", "HouseKeeping"];
+  const departments = ["Maintenance", "Food & Beverages", "Kitchen", "Front Desk", "House Keeping"];
 
   // Fetch Employees
   useEffect(() => {
@@ -135,10 +135,10 @@ export default function Ad_Profile() {
         const matchesId = empIdFilter ? item.employeeId === empIdFilter : true;
         return matchesDept && matchesId;
       } else {
-        return true; // show all admins
+        return true; 
       }
     })
-    .sort((a, b) => b.employeeId.localeCompare(a.employeeId)); // descending
+    .sort((a, b) => b.employeeId.localeCompare(a.employeeId));
 
   return (
     <Box sx={{ p: 3 }}>
@@ -184,6 +184,20 @@ export default function Ad_Profile() {
             </Button>
           </Box>
         </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <Box display="flex" justifyContent={isMobile ? "center" : "flex-end"}>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={() => navigate("/admin/Reg-face")}
+              sx={{ bgcolor: "#74C0E3", ":hover": { bgcolor: "#ffffff" }, border: "2px solid #000", borderRadius: "25px", color: "#000", px: 3, textTransform: "none" }}
+            >
+              Register Face {tableType}
+            </Button>
+          </Box>
+        </Grid>
+
       </Grid>
 
       {/* Table */}
